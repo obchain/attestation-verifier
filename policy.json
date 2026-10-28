@@ -1,16 +1,20 @@
 {
   "version": 1,
   "context_tag": "eulerphi-zkcert:v1",
-  "attestors": [],
+  "attestors": [
+    "0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb",
+    "0x244897572368eadf65bfbc5aec98d8e5443a9072",
+    "0x15ea90114bffea9bb996e8775bf6ca0a338e97e5"
+  ],
   "platforms": [
     {
       "name": "udemy",
       "hosts": ["www.udemy.com"],
-      "path_prefixes": ["/api-2.0/"],
-      "title_keys": ["title", "course_title", "courseTitle", "Title"],
-      "completion_keys": ["completion_ratio", "completionRatio", "Completion Ratio"],
+      "path_prefixes": ["/api-2.0/users/me/subscribed-courses/"],
+      "title_keys": ["title"],
+      "completion_keys": ["completion_ratio"],
       "completion_is_fraction": false,
-      "cert_id_keys": ["certificate_id", "cert_id", "certificateId"]
+      "cert_id_keys": []
     },
     {
       "name": "coursera",
