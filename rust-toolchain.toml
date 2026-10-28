@@ -1,0 +1,6 @@
+# Cargo.lock needs rustc >= 1.90 (ruint 1.21.1, edition2024 crates).
+# The SP1 guest is still built with the `succinct` toolchain, which `cargo prove`
+# selects via RUSTUP_TOOLCHAIN and overrides this file.
+[toolchain]
+channel = "1.90"
+profile = "minimal"
