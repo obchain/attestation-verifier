@@ -7,7 +7,8 @@
   "scripts": {
     "request": "tsx src/request.ts",
     "fixtures": "tsx src/fixtures.ts",
-    "sdk-verify": "tsx src/sdk-verify.ts"
+    "sdk-verify": "tsx src/sdk-verify.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@reclaimprotocol/js-sdk": "5.8.3",

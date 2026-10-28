@@ -15,13 +15,18 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Wallet, keccak256, toUtf8Bytes } from "ethers";
-import { createSignDataForClaim, getIdentifierFromClaimInfo } from "@reclaimprotocol/js-sdk";
+import {
+  createSignDataForClaim,
+  getIdentifierFromClaimInfo,
+  type Proof,
+  type ProviderClaimData,
+} from "@reclaimprotocol/js-sdk";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "fixtures");
 mkdirSync(join(root, "negative"), { recursive: true });
 
 // Deterministic throwaway keys. NEVER use these for anything real.
-const key = (label: string) => keccak256(toUtf8Bytes(`eulerphi-zkcert-test:${label}`));
+const key = (label: string): string => keccak256(toUtf8Bytes(`eulerphi-zkcert-test:${label}`));
 const testAttestor = new Wallet(key("attestor"));
 const rogueAttestor = new Wallet(key("rogue-attestor"));
 const sessionOwner = new Wallet(key("reclaim-session-owner"));
@@ -51,7 +56,12 @@ interface Spec {
   signer?: Wallet;
 }
 
-function makeProof(s: Spec) {
+// Reclaim proof shape as the SDK returns it, minus the fields we don't emit.
+type FixtureProof = Pick<Proof, "identifier" | "claimData" | "signatures" | "witnesses"> & {
+  publicData: null;
+};
+
+function makeProof(s: Spec): FixtureProof {
   const parameters = JSON.stringify({
     body: "",
     method: "GET",
@@ -69,7 +79,7 @@ function makeProof(s: Spec) {
     extractedParameters: s.fields,
     providerHash: keccak256(toUtf8Bytes(`provider:${s.platform}`)),
   });
-  const claim = {
+  const claim: ProviderClaimData = {
     provider: "http",
     parameters,
     owner: sessionOwner.address.toLowerCase(),
@@ -90,12 +100,12 @@ function makeProof(s: Spec) {
   };
 }
 
-const udemy = (title: string, completion: string, certId: string) => ({
+const udemy = (title: string, completion: string, certId: string): Record<string, string> => ({
   title,
   completion_ratio: completion,
   certificate_id: certId,
 });
-const coursera = (courseName: string, verifyCode: string) => ({ courseName, verifyCode });
+const coursera = (courseName: string, verifyCode: string): Record<string, string> => ({ courseName, verifyCode });
 
 // The happy-path set: 3 distinct crypto credentials + noise.
 const valid: Spec[] = [
@@ -153,7 +163,7 @@ const policy = {
   max_age_secs: 180 * 86400,
 };
 
-const write = (rel: string, obj: unknown) =>
+const write = (rel: string, obj: unknown): void =>
   writeFileSync(join(root, rel), JSON.stringify(obj, null, 2) + "\n");
 
 write("policy.test.json", policy);
