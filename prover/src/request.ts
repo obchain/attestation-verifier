@@ -23,28 +23,31 @@ import { ReclaimProofRequest, type Proof } from "@reclaimprotocol/js-sdk";
 // Must equal `context_tag` in policy.json.
 const CONTEXT_TAG = "eulerphi-zkcert:v1";
 
+const ENV_HELP = "copy prover/.env.example to prover/.env and fill it in";
+
 function arg(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);
   return i > -1 ? process.argv[i + 1] : undefined;
 }
-function need(name: string, value: string | undefined): string {
-  if (!value) {
-    console.error(`missing ${name}`);
-    process.exit(1);
-  }
-  return value;
+function fail(message: string): never {
+  console.error(message);
+  process.exit(1);
 }
 
-const platform = need("--platform (udemy|coursera)", arg("platform"));
-const wallet = need("--wallet", arg("wallet"));
-if (!isAddress(wallet)) need("a valid --wallet address", undefined);
+const platform = arg("platform");
+if (platform !== "udemy" && platform !== "coursera") fail("missing or invalid --platform (udemy|coursera)");
+const wallet = arg("wallet");
+if (wallet === undefined || !isAddress(wallet)) fail("missing or invalid --wallet (0x-prefixed address)");
 
-const providerId = need(
-  `${platform.toUpperCase()}_PROVIDER_ID in .env`,
-  process.env[`${platform.toUpperCase()}_PROVIDER_ID`],
-);
-const appId = need("RECLAIM_APP_ID in .env", process.env.RECLAIM_APP_ID);
-const appSecret = need("RECLAIM_APP_SECRET in .env", process.env.RECLAIM_APP_SECRET);
+// Check every required key up front so the user fixes .env in one go.
+const providerKey = `${platform.toUpperCase()}_PROVIDER_ID`;
+const required = ["RECLAIM_APP_ID", "RECLAIM_APP_SECRET", providerKey];
+const missing = required.filter((k) => !process.env[k]?.trim());
+if (missing.length > 0) fail(`missing in .env: ${missing.join(", ")} (${ENV_HELP})`);
+const env = (k: string): string => process.env[k]?.trim() ?? "";
+const appId = env("RECLAIM_APP_ID");
+const appSecret = env("RECLAIM_APP_SECRET");
+const providerId = env(providerKey);
 
 const outDir = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "proofs");
 mkdirSync(outDir, { recursive: true });
@@ -63,7 +66,7 @@ qrcode.generate(url, { small: true });
 await request.startSession({
   // The SDK's default flow already verifies attestor signatures and the
   // provider hash before calling this. SP1 re-checks everything independently.
-  onSuccess: (proofOrProofs: Proof | Proof[]) => {
+  onSuccess: (proofOrProofs: Proof | Proof[]): void => {
     const proofs = Array.isArray(proofOrProofs) ? proofOrProofs : [proofOrProofs];
     if (proofs.length === 0) {
       console.error("No proofs returned (callback URL mode?).");
@@ -73,12 +76,15 @@ await request.startSession({
     writeFileSync(file, JSON.stringify(proofs, null, 2) + "\n");
     console.log(`saved ${proofs.length} proof(s) -> ${file}`);
     for (const p of proofs) {
-      const ctx = JSON.parse(p.claimData.context || "{}");
-      console.log("revealed fields:", ctx.extractedParameters);
+      const ctx: unknown = JSON.parse(p.claimData.context || "{}");
+      const fields = typeof ctx === "object" && ctx !== null && "extractedParameters" in ctx
+        ? ctx.extractedParameters
+        : undefined;
+      console.log("revealed fields:", fields);
     }
     process.exit(0);
   },
-  onError: (err: Error) => {
+  onError: (err: Error): void => {
     console.error("proof generation failed:", err.message);
     process.exit(1);
   },
