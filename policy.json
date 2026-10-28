@@ -14,7 +14,8 @@
       "title_keys": ["title"],
       "completion_keys": ["completion_ratio"],
       "completion_is_fraction": false,
-      "cert_id_keys": []
+      "cert_id_keys": [],
+      "provider_hashes": ["0x04faa3b05ed4261018533612faea7710064f134c23f70c5ef961dc8663c107e0"]
     },
     {
       "name": "coursera",

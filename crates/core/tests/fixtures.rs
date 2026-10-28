@@ -133,6 +133,48 @@ fn rejects_stale_attestation() {
 }
 
 #[test]
+fn provider_hash_matches_sdk() {
+    // The test policy's provider hashes were computed by the SDK's own
+    // `hashProofClaimParams`; we must compute the same from each proof.
+    let i = input();
+    for p in &i.proofs {
+        let params: serde_json::Value = serde_json::from_str(&p.claim_data.parameters).unwrap();
+        let ours = reclaim::provider_hashes(&params).unwrap();
+        let pinned: Vec<[u8; 32]> =
+            i.policy.platforms.iter().flat_map(|r| r.provider_hash_bytes()).collect();
+        assert!(ours.iter().any(|h| pinned.contains(h)), "no SDK-pinned hash matches");
+    }
+}
+
+#[test]
+fn rejects_claimant_written_extraction_spec() {
+    assert_eq!(reject(&negative("unpinned-provider")), VerifyError::UnpinnedProvider);
+}
+
+#[test]
+fn ignores_claimant_param_values_as_fields() {
+    assert_eq!(reject(&negative("param-values-title")), VerifyError::MissingField("title"));
+}
+
+#[test]
+fn rejects_tag_that_only_shares_a_prefix() {
+    assert_eq!(reject(&negative("tag-prefix")), VerifyError::WrongContextTag);
+}
+
+#[test]
+fn empty_provider_pin_rejects_everything() {
+    let mut i = input();
+    for r in &mut i.policy.platforms {
+        r.provider_hashes.clear();
+    }
+    let p = i.proofs[0].clone();
+    assert_eq!(
+        verify_proof(&p, &i.policy, &wallet(&i), i.evaluated_at).unwrap_err(),
+        VerifyError::UnpinnedProvider
+    );
+}
+
+#[test]
 fn tampered_title_breaks_signature_binding() {
     // Editing the extracted course title changes the identifier, so the
     // signature recovers to a random address, not the attestor.

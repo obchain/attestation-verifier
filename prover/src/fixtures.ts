@@ -18,6 +18,8 @@ import { Wallet, keccak256, toUtf8Bytes } from "ethers";
 import {
   createSignDataForClaim,
   getIdentifierFromClaimInfo,
+  hashProofClaimParams,
+  type HttpProviderClaimParams,
   type Proof,
   type ProviderClaimData,
 } from "@reclaimprotocol/js-sdk";
@@ -54,6 +56,12 @@ interface Spec {
   ts?: number;
   url?: string;
   signer?: Wallet;
+  /** Override the jsonPath of every redaction (simulates a claimant-written extraction spec). */
+  redactionPath?: (field: string) => string;
+  /** Claimant-supplied template inputs (never attested). */
+  paramValues?: Record<string, string>;
+  /** Override what the attestor extracted (defaults to `fields`). */
+  extracted?: Record<string, string>;
 }
 
 // Reclaim proof shape as the SDK returns it, minus the fields we don't emit.
@@ -65,18 +73,18 @@ function makeProof(s: Spec): FixtureProof {
   const parameters = JSON.stringify({
     body: "",
     method: "GET",
-    paramValues: {},
+    paramValues: s.paramValues ?? {},
     responseMatches: Object.keys(s.fields).map((k) => ({
       type: "regex",
       value: `"${k}":"?(?<${k}>[^",}]+)`,
     })),
-    responseRedactions: Object.keys(s.fields).map((k) => ({ jsonPath: `$..${k}` })),
+    responseRedactions: Object.keys(s.fields).map((k) => ({ jsonPath: s.redactionPath?.(k) ?? `$..${k}` })),
     url: s.url ?? ENDPOINT[s.platform],
   });
   const context = JSON.stringify({
     contextAddress: s.wallet ?? userWallet,
     contextMessage: `${s.tag ?? CONTEXT_TAG}:nonce-${s.name}`,
-    extractedParameters: s.fields,
+    extractedParameters: s.extracted ?? s.fields,
     providerHash: keccak256(toUtf8Bytes(`provider:${s.platform}`)),
   });
   const claim: ProviderClaimData = {
@@ -125,7 +133,31 @@ const negative: Spec[] = [
   { name: "wrong-endpoint", platform: "udemy", url: "https://www.udemy.com/course/some-public-page/", fields: udemy("Solidity Security", "100", "UC-7") },
   { name: "foreign-app-tag", platform: "udemy", tag: "some-other-app:v1", fields: udemy("Solidity Security", "100", "UC-8") },
   { name: "stale", platform: "udemy", ts: T0 - 400 * 86400, fields: udemy("Solidity Security", "100", "UC-9") },
+  // Same endpoint, but the claimant picked which array element each field comes from.
+  { name: "unpinned-provider", platform: "udemy", redactionPath: (k) => `$.results[7].${k}`, fields: udemy("Solidity Security", "100", "UC-10") },
+  // Title only in claimant-supplied paramValues, not extracted by the attestor.
+  {
+    name: "param-values-title",
+    platform: "udemy",
+    fields: udemy("Solidity Security", "100", "UC-11"),
+    paramValues: { title: "Blockchain Mastery" },
+    extracted: { completion_ratio: "100", certificate_id: "UC-11" },
+  },
+  // Tag is a prefix of ours but a different app version.
+  { name: "tag-prefix", platform: "udemy", tag: `${CONTEXT_TAG}0`, fields: udemy("Solidity Security", "100", "UC-12") },
 ];
+
+// Provider hashes (computed by the SDK itself) of the request specs the valid set uses.
+const providerHashes = (platform: Platform): string[] => {
+  const hashes = valid
+    .filter((v) => v.platform === platform)
+    .flatMap((v) => {
+      const params = JSON.parse(makeProof(v).claimData.parameters) as HttpProviderClaimParams;
+      const h = hashProofClaimParams(params);
+      return Array.isArray(h) ? h : [h];
+    });
+  return [...new Set(hashes)].sort();
+};
 
 const policy = {
   version: 1,
@@ -140,6 +172,7 @@ const policy = {
       completion_keys: ["completion_ratio", "completionRatio"],
       completion_is_fraction: false,
       cert_id_keys: ["certificate_id", "cert_id"],
+      provider_hashes: providerHashes("udemy"),
     },
     {
       name: "coursera",
@@ -149,6 +182,7 @@ const policy = {
       completion_keys: [],
       completion_is_fraction: false,
       cert_id_keys: ["verifyCode", "certificate_id"],
+      provider_hashes: providerHashes("coursera"),
     },
   ],
   industry: {

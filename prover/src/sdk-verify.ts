@@ -7,7 +7,7 @@
  * SDK's own `assertVerifiedProof` against a trusted attestor set:
  *   --policy <file>  trust that policy's `attestors` (offline)
  *   --online         trust Reclaim's live attestor list (fetched)
- * Use the printed attestor + URL to fill in policy.json.
+ * Use the printed attestor, URL and provider hash(es) to fill in policy.json.
  *
  * The SDK only checks "signed by a trusted attestor". Wallet binding, context
  * tag, endpoint pinning and freshness are ours (crates/core), so the SDK
@@ -20,6 +20,8 @@ import {
   assertVerifiedProof,
   getAttestors,
   getIdentifierFromClaimInfo,
+  hashProofClaimParams,
+  isHttpProviderClaimParams,
   recoverSignersOfSignedClaim,
   type Proof,
   type ProviderClaimData,
@@ -134,6 +136,8 @@ for (const f of files) {
     console.log(`\n${f}`);
     console.log("  sdk verdict", verdict);
     console.log("  url        ", params.url);
+    const ph = isHttpProviderClaimParams(params) ? hashProofClaimParams(params) : "n/a (not an HTTP claim)";
+    console.log("  provider # ", (Array.isArray(ph) ? ph : [ph]).join(", "));
     console.log("  signers    ", signers.join(", "));
     console.log(
       "  identifier ",

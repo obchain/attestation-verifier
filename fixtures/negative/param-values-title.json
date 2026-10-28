@@ -1,0 +1,22 @@
+{
+  "identifier": "0x665464a0e68c525893938952f11175d36f87385c54f5e9e28b2af09db1998765",
+  "claimData": {
+    "provider": "http",
+    "parameters": "{\"body\":\"\",\"method\":\"GET\",\"paramValues\":{\"title\":\"Blockchain Mastery\"},\"responseMatches\":[{\"type\":\"regex\",\"value\":\"\\\"title\\\":\\\"?(?<title>[^\\\",}]+)\"},{\"type\":\"regex\",\"value\":\"\\\"completion_ratio\\\":\\\"?(?<completion_ratio>[^\\\",}]+)\"},{\"type\":\"regex\",\"value\":\"\\\"certificate_id\\\":\\\"?(?<certificate_id>[^\\\",}]+)\"}],\"responseRedactions\":[{\"jsonPath\":\"$..title\"},{\"jsonPath\":\"$..completion_ratio\"},{\"jsonPath\":\"$..certificate_id\"}],\"url\":\"https://www.udemy.com/api-2.0/users/me/subscribed-courses/?fields[course]=title,completion_ratio\"}",
+    "owner": "0xdee129a48c325482d250f29ce0759a343161803c",
+    "timestampS": 1793167200,
+    "context": "{\"contextAddress\":\"0x5Aae27DacAf8b6b7A6eEA2406bf356F105cae7C5\",\"contextMessage\":\"eulerphi-zkcert:v1:nonce-param-values-title\",\"extractedParameters\":{\"completion_ratio\":\"100\",\"certificate_id\":\"UC-11\"},\"providerHash\":\"0x85e3157c973b93373dc395c614975139e27c65cd7645d99affec81d7e64dda29\"}",
+    "identifier": "0x665464a0e68c525893938952f11175d36f87385c54f5e9e28b2af09db1998765",
+    "epoch": 1
+  },
+  "signatures": [
+    "0x8cdcc53242ff86a122f68a53fd88ad2361a61ebcf864cb8b080a4626b29e47fe64180c952343c9104a290932e98ea020af656d3446d0bf4d3c80d5094fb078f51c"
+  ],
+  "witnesses": [
+    {
+      "id": "0x68312734a46b122dd45cd408d9317a2858114347",
+      "url": "wss://test-attestor.invalid/ws"
+    }
+  ],
+  "publicData": null
+}

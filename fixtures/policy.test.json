@@ -25,6 +25,9 @@
       "cert_id_keys": [
         "certificate_id",
         "cert_id"
+      ],
+      "provider_hashes": [
+        "0x6fdbe3d0d88682969a7dfb593e9ab36e634c289f12d1c3e3aa7ed137d0070843"
       ]
     },
     {
@@ -45,6 +48,9 @@
       "cert_id_keys": [
         "verifyCode",
         "certificate_id"
+      ],
+      "provider_hashes": [
+        "0xcf5bda0a3e6fe63cc7e2e4a3a1db800f73393cb257c5452a35d0fdc75fc6c3fe"
       ]
     }
   ],

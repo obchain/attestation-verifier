@@ -150,3 +150,89 @@ pub fn recover_signers(proof: &ReclaimProof) -> Result<Vec<[u8; 20]>, VerifyErro
         .map(|s| recover_signer(&msg, s))
         .collect()
 }
+
+/// Most `responseMatches` a claim may carry. The SDK hashes every subset of the
+/// optional matches (2^n), so this bounds the work done inside the zkVM.
+const MAX_RESPONSE_MATCHES: usize = 12;
+
+/// Provider hashes of a claim's HTTP parameters, mirroring the SDK's
+/// `hashProofClaimParams` / `getProviderParamsAsCanonicalizedString`: keccak256
+/// of the canonical JSON of `{url, method, body, responseMatches, responseRedactions}`,
+/// one hash per valid combination of optional matches. `paramValues` is not part
+/// of the hash, exactly as in the SDK.
+pub fn provider_hashes(params: &serde_json::Value) -> Result<Vec<[u8; 32]>, VerifyError> {
+    use serde_json::{json, Map, Value};
+
+    let empty = Vec::new();
+    let matches = params
+        .get("responseMatches")
+        .and_then(Value::as_array)
+        .unwrap_or(&empty);
+    let redactions = params
+        .get("responseRedactions")
+        .and_then(Value::as_array)
+        .unwrap_or(&empty);
+    if matches.len() > MAX_RESPONSE_MATCHES {
+        return Err(VerifyError::MalformedParameters);
+    }
+    let or = |v: Option<&Value>, d: &str| match v {
+        Some(Value::Null) | None => Value::String(d.to_string()),
+        Some(x) => x.clone(),
+    };
+    // JS `x || undefined`: keep only truthy values.
+    let truthy = |v: Option<&Value>| match v {
+        None | Some(Value::Null) | Some(Value::Bool(false)) => None,
+        Some(Value::String(s)) if s.is_empty() => None,
+        Some(Value::Number(n)) if n.as_f64() == Some(0.0) => None,
+        Some(x) => Some(x.clone()),
+    };
+    let canonical = |m: Vec<Value>, r: Vec<Value>| -> Result<[u8; 32], VerifyError> {
+        let filtered = json!({
+            "url": or(params.get("url"), ""),
+            "method": or(params.get("method"), "GET"),
+            "body": or(params.get("body"), ""),
+            "responseMatches": m,
+            "responseRedactions": r,
+        });
+        let s = serde_json::to_string(&filtered).map_err(|_| VerifyError::MalformedParameters)?;
+        Ok(keccak256(s.as_bytes()))
+    };
+
+    let mut out = Vec::new();
+    for mask in 1u32..(1u32 << matches.len()) {
+        let (mut m, mut r) = (Vec::new(), Vec::new());
+        let mut valid = true;
+        for j in 0..matches.len() {
+            let mj = &matches[j];
+            if mask & (1 << j) != 0 {
+                let mut o = Map::new();
+                o.insert("value".into(), or(mj.get("value"), ""));
+                o.insert("type".into(), or(mj.get("type"), "contains"));
+                if let Some(inv) = truthy(mj.get("invert")) {
+                    o.insert("invert".into(), inv);
+                }
+                m.push(Value::Object(o));
+                if let Some(rj) = redactions.get(j).filter(|v| !v.is_null()) {
+                    let mut o = Map::new();
+                    o.insert("xPath".into(), or(rj.get("xPath"), ""));
+                    o.insert("jsonPath".into(), or(rj.get("jsonPath"), ""));
+                    o.insert("regex".into(), or(rj.get("regex"), ""));
+                    if let Some(h) = truthy(rj.get("hash")) {
+                        o.insert("hash".into(), h);
+                    }
+                    r.push(Value::Object(o));
+                }
+            } else if truthy(mj.get("isOptional")).is_none() {
+                valid = false;
+                break;
+            }
+        }
+        if valid {
+            out.push(canonical(m, r)?);
+        }
+    }
+    if out.is_empty() {
+        out.push(canonical(Vec::new(), Vec::new())?);
+    }
+    Ok(out)
+}

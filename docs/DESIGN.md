@@ -74,10 +74,11 @@ the attestor.
 |---|---|---|
 | 1 | ≥1 signature recovers to an address in `policy.attestors` | Forged/edited proofs, self-signed proofs |
 | 2 | `parameters.url` is `https://`, host ∈ platform `hosts`, path starts with a pinned prefix | Proofs from look-alike domains (`udemy.com.evil.io`), or from public pages anyone can load |
+| 2b | Provider hash of `{url, method, body, responseMatches, responseRedactions}` (the SDK's `hashProofClaimParams`) ∈ platform `provider_hashes` | A claimant writing their own extraction spec, e.g. title from one course and completion from another, or a path-traversal URL |
 | 3 | `context.contextAddress == wallet` | Replaying someone else's proof |
-| 4 | `context.contextMessage` starts with `context_tag` | Reusing a proof the user made for a different app |
+| 4 | `context.contextMessage` is `context_tag` or starts with `context_tag + ":"` | Reusing a proof the user made for a different app or app version |
 | 5 | `now - timestampS ≤ max_age_secs` (+5 min skew) | Stale or revoked credentials lingering forever |
-| 6 | Title present; completion parsed (or implied for certificate-only endpoints) | Malformed claims |
+| 6 | Title present; completion parsed (or implied for certificate-only endpoints), read only from attestor-extracted `context.extractedParameters`, never from claimant `paramValues` | Malformed claims, self-declared fields |
 
 ### 3.3 Set evaluation (`crates/core::evaluate`)
 

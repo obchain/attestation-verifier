@@ -15,6 +15,8 @@ pub enum VerifyError {
     UntrustedAttestor,
     /// The attested URL is not an allowed endpoint of a supported platform.
     UnknownPlatform,
+    /// The request / extraction spec is not one the policy pins (provider hash).
+    UnpinnedProvider,
     /// `contextAddress` is not the wallet the proof is being generated for.
     WalletMismatch,
     /// `contextMessage` lacks the app's domain-separation tag.
@@ -35,6 +37,7 @@ impl fmt::Display for VerifyError {
             Self::NoSignatures => "proof carries no signatures",
             Self::UntrustedAttestor => "no signature from a trusted attestor",
             Self::UnknownPlatform => "attested URL is not an allowed platform endpoint",
+            Self::UnpinnedProvider => "request or extraction spec is not a pinned provider",
             Self::WalletMismatch => "proof is bound to a different wallet",
             Self::WrongContextTag => "context message lacks the expected app tag",
             Self::Stale => "attestation is outside the allowed time window",

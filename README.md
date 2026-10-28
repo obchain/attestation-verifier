@@ -52,7 +52,7 @@ Full HLD, LLD and threat model: [docs/DESIGN.md](docs/DESIGN.md).
 **1. Tests (no SP1 toolchain needed)**
 
 ```bash
-cargo test            # 19 tests: SDK compatibility, happy path, forgery/replay/staleness rejections
+cargo test            # 24 tests: SDK compatibility, happy path, forgery/replay/staleness/spec rejections
 ```
 
 **2. Prove with fixtures**
@@ -129,6 +129,9 @@ industry, with `certSetCommitment` committing to them.
 | Public page instead of account API | `negative/wrong-endpoint` | `UnknownPlatform` |
 | Proof made for another app | `negative/foreign-app-tag` | `WrongContextTag` |
 | Old attestation | `negative/stale` | `Stale` |
+| Claimant-written extraction spec (fields from other courses) | `negative/unpinned-provider` | `UnpinnedProvider` |
+| Self-declared title in `paramValues` | `negative/param-values-title` | `MissingField("title")` |
+| App tag that only shares a prefix (`…:v10`) | `negative/tag-prefix` | `WrongContextTag` |
 | Edit course title / wallet after signing | tamper tests | signature no longer recovers to attestor |
 | Submit same certificate twice | duplicate fixture | counted once |
 | Sneak one bad proof into a good set | fail-closed test | whole evaluation rejected |

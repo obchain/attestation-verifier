@@ -6,7 +6,8 @@
 //! Pipeline for each Reclaim zkTLS proof:
 //! 1. recompute the claim identifier and recover the attestor signatures;
 //! 2. require at least one trusted attestor;
-//! 3. require the attested URL to be an allowed Udemy/Coursera endpoint;
+//! 3. require the attested URL to be an allowed Udemy/Coursera endpoint, and the
+//!    request + extraction spec to match a pinned provider hash;
 //! 4. require the proof to be bound to the prover's wallet and to our app tag;
 //! 5. require the attestation to be fresh;
 //! 6. extract title / completion / certificate id.
@@ -118,22 +119,18 @@ fn split_url(url: &str) -> Option<(String, String)> {
     Some((host, path))
 }
 
-/// Extracted parameters: `context.extractedParameters` (what the attestor pulled
-/// out of the response), falling back to `parameters.paramValues`.
-fn extracted_params(
-    ctx: &serde_json::Value,
-    params: &serde_json::Value,
-) -> BTreeMap<String, String> {
+/// Extracted parameters: only `context.extractedParameters`, what the attestor
+/// pulled out of the response. `parameters.paramValues` are claimant-supplied
+/// template inputs and are never read as credential fields.
+fn extracted_params(ctx: &serde_json::Value) -> BTreeMap<String, String> {
     let mut out = BTreeMap::new();
-    for src in [params.get("paramValues"), ctx.get("extractedParameters")] {
-        if let Some(obj) = src.and_then(|v| v.as_object()) {
-            for (k, v) in obj {
-                let s = match v {
-                    serde_json::Value::String(s) => s.clone(),
-                    other => other.to_string(),
-                };
-                out.insert(k.clone(), s);
-            }
+    if let Some(obj) = ctx.get("extractedParameters").and_then(|v| v.as_object()) {
+        for (k, v) in obj {
+            let s = match v {
+                serde_json::Value::String(s) => s.clone(),
+                other => other.to_string(),
+            };
+            out.insert(k.clone(), s);
         }
     }
     out
@@ -186,6 +183,12 @@ pub fn verify_proof(
                     || r.path_prefixes.iter().any(|p| path.starts_with(p.as_str())))
         })
         .ok_or(VerifyError::UnknownPlatform)?;
+    // Without this, a claimant could choose which response fields become the
+    // title and completion (e.g. title of one course, completion of another).
+    let pinned = rule.provider_hash_bytes();
+    if !reclaim::provider_hashes(&params)?.iter().any(|h| pinned.contains(h)) {
+        return Err(VerifyError::UnpinnedProvider);
+    }
 
     // 4. Wallet binding + app domain separation.
     let ctx: serde_json::Value = if proof.claim_data.context.is_empty() {
@@ -201,7 +204,10 @@ pub fn verify_proof(
         return Err(VerifyError::WalletMismatch);
     }
     let ctx_msg = ctx.get("contextMessage").and_then(|v| v.as_str()).unwrap_or("");
-    if !ctx_msg.starts_with(&policy.context_tag) {
+    let tagged = ctx_msg
+        .strip_prefix(policy.context_tag.as_str())
+        .is_some_and(|rest| rest.is_empty() || rest.starts_with(':'));
+    if !tagged {
         return Err(VerifyError::WrongContextTag);
     }
 
@@ -212,7 +218,7 @@ pub fn verify_proof(
     }
 
     // 6. Fields.
-    let fields = extracted_params(&ctx, &params);
+    let fields = extracted_params(&ctx);
     let title = first_of(&fields, &rule.title_keys)
         .filter(|t| !t.trim().is_empty())
         .ok_or(VerifyError::MissingField("title"))?

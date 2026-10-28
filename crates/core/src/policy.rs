@@ -43,6 +43,22 @@ pub struct PlatformRule {
     pub completion_is_fraction: bool,
     /// Extracted-parameter names for a certificate / credential ID (used for dedup).
     pub cert_id_keys: Vec<String>,
+    /// Allowed Reclaim provider hashes (SDK `hashProofClaimParams`, `0x` hex). Pins the
+    /// exact request and which response fields are extracted. Empty = reject all.
+    #[serde(default)]
+    pub provider_hashes: Vec<String>,
+}
+
+impl PlatformRule {
+    pub fn provider_hash_bytes(&self) -> Vec<[u8; 32]> {
+        self.provider_hashes
+            .iter()
+            .filter_map(|h| {
+                let b = hex::decode(h.trim().trim_start_matches("0x")).ok()?;
+                b.try_into().ok()
+            })
+            .collect()
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]

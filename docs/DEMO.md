@@ -56,7 +56,7 @@ cd ../script && cargo run --release -q -- check --proofs-dir ../proofs --policy 
 cargo run --release -q -- prove --proofs-dir ../proofs --policy ../policy.json --wallet $WALLET --system compressed
 ```
 
-Cut or speed up the wait. Mention ~1.1M cycles, keccak/secp256k1 precompiles.
+Cut or speed up the wait. Mention ~1.7M cycles, keccak/secp256k1 precompiles.
 
 ## 5. Anyone can verify (15 s)
 
