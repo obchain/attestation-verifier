@@ -206,6 +206,7 @@ write("input.test.json", {
   policy,
   wallet: userWallet,
   evaluated_at: EVALUATED_AT,
+  blinding: key("commitment-blinding"),
 });
 for (const n of negative) write(join("negative", `${n.name}.json`), makeProof(n));
 write("meta.json", {

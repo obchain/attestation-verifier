@@ -212,5 +212,6 @@
     "max_age_secs": 15552000
   },
   "wallet": "0x5Aae27DacAf8b6b7A6eEA2406bf356F105cae7C5",
-  "evaluated_at": 1793170800
+  "evaluated_at": 1793170800,
+  "blinding": "0x9bfc867ce542c3deabadcd431863a6ac11d388426d226f56d4bccd17e65dbc06"
 }

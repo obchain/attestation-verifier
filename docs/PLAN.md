@@ -6,7 +6,7 @@ Deadline: **Thu 2026-10-29, end of day IST**.
 
 - [x] Confirmed Reclaim's exact signing format from `@reclaimprotocol/js-sdk` 5.8.3 source
 - [x] `crates/core`: proof verification, policy, industry matching, dedup, commitment, ABI output
-- [x] Fixtures signed through the SDK's own signing functions + 24 passing tests
+- [x] Fixtures signed through the SDK's own signing functions + 26 passing tests
       (SDK compatibility, happy path, 6 negative fixtures, tamper tests, fail-closed)
 - [x] SP1 guest program + `zkcert` CLI (`check | execute | prove | verify | vkey`)
 - [x] `prover/request.ts` (real wallet-bound Reclaim proofs), `sdk-verify.ts` cross-check
@@ -26,7 +26,7 @@ Deadline: **Thu 2026-10-29, end of day IST**.
    — SP1 6.10.0, 1,110,897 cycles, compressed prove 146 s wall on M-series (19.5 GB peak RSS),
    proof.bin 1.27 MB, vkey `0x00f7542b4a7d932944f31c68acde3fa578798ee1410bb62bf3754f5ee975a58b`.
    Rogue-attestor fixture panics the guest in the zkVM (fail closed).
-   After the provider-hash check (security review, 28 Oct): 1,699,586 cycles.
+   After the security-review fixes (provider hash, blinded commitment): 1,705,314 cycles.
 3. [x] `policy.json`: 3 live attestors, Udemy endpoint + fields pinned, `min_count: 1` (docs/PROVIDERS.md)
 4. [ ] Real Udemy proof: `cd prover && npm run request -- --platform udemy --wallet 0x...`
 5. [ ] `npm run sdk-verify -- ../proofs/<file>.json --online`: signer ∈ policy attestors,

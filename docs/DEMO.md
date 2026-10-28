@@ -8,6 +8,7 @@ Set once:
 
 ```bash
 export WALLET=0xYourWallet
+export BLINDING=0x$(openssl rand -hex 32)   # private; same value keeps check and prove consistent
 ```
 
 ## 0. Problem (15 s, no terminal)
@@ -43,7 +44,7 @@ npm run sdk-verify -- ../proofs/udemy-*.json --online
 ## 3. Native dry run (20 s)
 
 ```bash
-cd ../script && cargo run --release -q -- check --proofs-dir ../proofs --policy ../policy.json --wallet $WALLET
+cd ../script && cargo run --release -q -- check --proofs-dir ../proofs --policy ../policy.json --wallet $WALLET --blinding $BLINDING
 ```
 
 > Same Rust verifier that runs inside SP1: checks the attestor signature, host and endpoint,
@@ -53,7 +54,7 @@ cd ../script && cargo run --release -q -- check --proofs-dir ../proofs --policy 
 ## 4. Prove in SP1 (30 s on camera, ~2.5 min real)
 
 ```bash
-cargo run --release -q -- prove --proofs-dir ../proofs --policy ../policy.json --wallet $WALLET --system compressed
+cargo run --release -q -- prove --proofs-dir ../proofs --policy ../policy.json --wallet $WALLET --blinding $BLINDING --system compressed
 ```
 
 Cut or speed up the wait. Mention ~1.7M cycles, keccak/secp256k1 precompiles.
@@ -66,7 +67,8 @@ cargo run --release -q -- verify --proof proof.bin
 
 > The verifier sees: wallet, industry `crypto`, qualified count, `passed: true`, the policy hash
 > (which attestors, endpoints and thresholds were applied), a commitment to the course set, and the
-> evaluation time. No course names, no account, no email.
+> evaluation time. No course names, no account, no email. The commitment is blinded, so it can't be
+> matched against Udemy's public course list.
 
 ## 6. It fails closed (20 s)
 

@@ -85,7 +85,10 @@ the attestor.
 - `dedup_key = sha256(platform ‖ 0x00 ‖ ("id:"+cert_id | "title:"+normalized_title))`
 - Each verified credential gets a verdict: `Counted | Duplicate | Incomplete | OtherIndustry`.
 - Industry match: word-boundary keyword match on the title (`"defi"` ≠ `"definitely"`; `zk*` prefix).
-- `certSetCommitment = sha256(sorted dedup keys of counted credentials)` (order-independent).
+- `certSetCommitment = sha256(blinding ‖ sorted dedup keys of counted credentials)` (order-independent).
+  `blinding` is a private 32-byte random input (all-zero rejected). Without it, the commitment of a
+  single course would be `sha256(sha256("udemy\0title:" + title))`, which anyone could brute-force
+  against Udemy's public catalog and use to link wallets.
   The holder can later reveal one credential and prove it's in the set without re-proving.
 - Any rejected proof aborts with its index: **fail closed**.
 

@@ -23,6 +23,8 @@ pub enum VerifyError {
     WrongContextTag,
     /// Attestation is older than the policy allows (or from the future).
     Stale,
+    /// `ProgramInput.blinding` is not 32 bytes of hex, or is all zero.
+    BadBlinding,
     /// A required extracted field (e.g. course title) is missing.
     MissingField(&'static str),
 }
@@ -41,6 +43,7 @@ impl fmt::Display for VerifyError {
             Self::WalletMismatch => "proof is bound to a different wallet",
             Self::WrongContextTag => "context message lacks the expected app tag",
             Self::Stale => "attestation is outside the allowed time window",
+            Self::BadBlinding => "blinding must be 32 non-zero bytes of hex",
             Self::MissingField(k) => return write!(f, "required field `{k}` not found"),
         };
         f.write_str(s)

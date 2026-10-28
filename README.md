@@ -52,7 +52,7 @@ Full HLD, LLD and threat model: [docs/DESIGN.md](docs/DESIGN.md).
 **1. Tests (no SP1 toolchain needed)**
 
 ```bash
-cargo test            # 24 tests: SDK compatibility, happy path, forgery/replay/staleness/spec rejections
+cargo test            # 26 tests: SDK compatibility, happy path, forgery/replay/staleness/spec rejections
 ```
 
 **2. Prove with fixtures**
@@ -117,7 +117,8 @@ the prover knows Reclaim proofs such that every proof:
 is signed by an attestor in the policy; attests an allowed endpoint of an allowed platform;
 is bound to `wallet` and to this app; was attested within `max_age_secs` of `evaluatedAt`;
 and exactly `qualifiedCount` distinct ones are ≥ `min_completion_pct` complete and match the
-industry, with `certSetCommitment` committing to them.
+industry, with `certSetCommitment` committing to them under a private random blinding (so the
+commitment reveals nothing about which courses, and two wallets with the same course don't match).
 
 ## Security tests
 

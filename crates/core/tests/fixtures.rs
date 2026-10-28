@@ -80,6 +80,26 @@ fn commitment_is_order_independent() {
 }
 
 #[test]
+fn commitment_is_blinded() {
+    // Same courses, different private blinding: the commitment must not repeat,
+    // or anyone could brute-force public course titles against it.
+    let mut i = input();
+    let a = evaluate(&i).unwrap().public.certSetCommitment;
+    i.blinding = format!("0x{}", "11".repeat(32));
+    let b = evaluate(&i).unwrap().public.certSetCommitment;
+    assert_ne!(a, b);
+}
+
+#[test]
+fn rejects_missing_or_zero_blinding() {
+    for bad in ["", "0x1234", &format!("0x{}", "00".repeat(32))] {
+        let mut i = input();
+        i.blinding = bad.to_string();
+        assert_eq!(evaluate(&i).unwrap_err().1, VerifyError::BadBlinding, "{bad:?}");
+    }
+}
+
+#[test]
 fn threshold_not_met_still_proves_but_fails() {
     let mut i = input();
     i.policy.min_count = 4;

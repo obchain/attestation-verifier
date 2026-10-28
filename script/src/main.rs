@@ -42,6 +42,10 @@ struct InputArgs {
     /// Evaluation time (unix seconds). Defaults to now.
     #[arg(long)]
     at: Option<u64>,
+    /// Private 32-byte hex blinding for the commitment. Defaults to a fresh random value
+    /// (printed to stderr; keep it to open the commitment later).
+    #[arg(long)]
+    blinding: Option<String>,
 }
 
 #[derive(Copy, Clone, ValueEnum)]
@@ -102,8 +106,15 @@ fn load_input(a: &InputArgs) -> ProgramInput {
             policy,
             wallet: a.wallet.clone().expect("--wallet required"),
             evaluated_at: 0,
+            blinding: String::new(),
         }
     };
+    if let Some(b) = &a.blinding {
+        input.blinding = b.clone();
+    } else if input.blinding.is_empty() {
+        input.blinding = random_blinding();
+        eprintln!("blinding (private, keep to open the commitment): {}", input.blinding);
+    }
     if let Some(t) = a.at {
         input.evaluated_at = t;
     } else if input.evaluated_at == 0 {
@@ -113,6 +124,15 @@ fn load_input(a: &InputArgs) -> ProgramInput {
             .as_secs();
     }
     input
+}
+
+fn random_blinding() -> String {
+    use std::io::Read;
+    let mut b = [0u8; 32];
+    std::fs::File::open("/dev/urandom")
+        .and_then(|mut f| f.read_exact(&mut b))
+        .expect("read /dev/urandom");
+    format!("0x{}", hex::encode(b))
 }
 
 fn read(p: &Path) -> String {

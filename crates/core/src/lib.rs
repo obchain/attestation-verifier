@@ -42,8 +42,9 @@ sol! {
         /// Distinct credentials that satisfied the policy.
         uint32 qualifiedCount;
         bool passed;
-        /// sha256 over the sorted dedup keys of the qualifying credentials.
-        /// Lets the holder later reveal a specific credential without re-proving.
+        /// sha256(blinding ‖ sorted dedup keys of the qualifying credentials). The
+        /// private blinding stops anyone from brute-forcing public course titles;
+        /// the holder can later open it (blinding + keys) without re-proving.
         bytes32 certSetCommitment;
         /// Unix time the policy was evaluated at (freshness reference).
         uint64 evaluatedAt;
@@ -59,6 +60,20 @@ pub struct ProgramInput {
     pub wallet: String,
     /// Evaluation time (unix seconds), supplied by the host and made public.
     pub evaluated_at: u64,
+    /// Private `0x` 32-byte random value mixed into `certSetCommitment`. Never
+    /// committed. All-zero is rejected so a lazy host can't skip it.
+    pub blinding: String,
+}
+
+fn parse_blinding(s: &str) -> Result<[u8; 32], VerifyError> {
+    let b: [u8; 32] = hex::decode(s.trim().trim_start_matches("0x"))
+        .ok()
+        .and_then(|b| b.try_into().ok())
+        .ok_or(VerifyError::BadBlinding)?;
+    if b == [0u8; 32] {
+        return Err(VerifyError::BadBlinding);
+    }
+    Ok(b)
 }
 
 /// A credential extracted from one verified proof.
@@ -246,6 +261,7 @@ pub fn verify_proof(
 /// aborts the whole evaluation and reports its index.
 pub fn evaluate(input: &ProgramInput) -> Result<Evaluation, (usize, VerifyError)> {
     let wallet = reclaim::parse_address(&input.wallet).map_err(|e| (usize::MAX, e))?;
+    let blinding = parse_blinding(&input.blinding).map_err(|e| (usize::MAX, e))?;
     let policy = &input.policy;
 
     let mut seen = std::collections::BTreeSet::new();
@@ -270,6 +286,7 @@ pub fn evaluate(input: &ProgramInput) -> Result<Evaluation, (usize, VerifyError)
 
     counted_keys.sort();
     let mut h = Sha256::new();
+    h.update(blinding);
     for k in &counted_keys {
         h.update(k);
     }
