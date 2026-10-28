@@ -1,9 +1,10 @@
 # eulerphi-zkcert
 
-**Verified-expert proofs for Phi, from zkTLS-attested Udemy and Coursera credentials, proven in SP1.**
+**Verified-expert proofs for Phi, from zkTLS-attested Udemy course completions, proven in SP1.**
+Coursera uses the same pipeline but needs a custom Reclaim provider (see [Limitations](#limitations)).
 
-> *"Wallet `0x5Aae…e7C5` holds at least 2 distinct, fully completed credentials in the **Crypto**
-> industry, attested from udemy.com / coursera.org."*
+> *"Wallet `0x5Aae…e7C5` holds at least 2 distinct, fully completed courses in the **Crypto**
+> industry, attested from udemy.com."*
 > The verifier learns that sentence. It does not learn which courses, the account, or the email.
 
 ## Why this matters for EulerPhi
@@ -86,8 +87,7 @@ passed            true
 ```bash
 cd prover && npm install && cp .env.example .env   # fill in Reclaim app + provider IDs
 npm run request -- --platform udemy --wallet 0xYourWallet     # scan QR, log into Udemy
-npm run sdk-verify -- ../proofs/udemy-*.json --online          # see attestor, fields, URL
-# put the attestor address into policy.json "attestors", confirm field names / endpoint
+npm run sdk-verify -- ../proofs/udemy-*.json --online          # signer must be one of policy.json "attestors"
 cd ../script
 cargo run --release -- prove --proofs-dir ../proofs --policy ../policy.json --wallet 0xYourWallet
 ```
@@ -135,6 +135,16 @@ industry, with `certSetCommitment` committing to them.
 
 ## Limitations
 
-The main trust assumption is the Reclaim attestor set. Field names and endpoints of real
-providers must be pinned from a real proof. Industry matching uses keywords. Details and
-mitigations in [docs/DESIGN.md](docs/DESIGN.md#4-known-limitations).
+The main trust assumption is the Reclaim attestor set (`policy.json` pins the 3 live attestors as of
+2026-10-28). Industry matching uses keywords. Details and mitigations in
+[docs/DESIGN.md](docs/DESIGN.md#4-known-limitations); provider research in [docs/PROVIDERS.md](docs/PROVIDERS.md).
+
+- **Courses, not certificates.** Reclaim's public Udemy provider ("Udemy Course Name") exposes title and
+  `completion_ratio`, not a certificate id or date, so "completed" means 100% progress. Dedup falls back
+  to the normalized title.
+- **One course per proof.** That provider reveals only the most recently accessed course, so N courses
+  need N proofs, each made after opening a different completed course.
+- **Coursera is designed, not shipped.** No public Reclaim provider exists; a custom provider on the logged-in
+  accomplishments API is needed. The policy block is in place, but no Coursera proof has been made.
+- **Solidity ↔ Rust encoding not cross-checked.** `contracts/` tests use Solidity-encoded public values;
+  decoding a Rust-produced `PublicValuesStruct` in a test is still to do. Nothing is deployed.
