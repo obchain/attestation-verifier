@@ -143,7 +143,9 @@ The main trust assumption is the Reclaim attestor set (`policy.json` pins the 3 
   `completion_ratio`, not a certificate id or date, so "completed" means 100% progress. Dedup falls back
   to the normalized title.
 - **One course per proof.** That provider reveals only the most recently accessed course, so N courses
-  need N proofs, each made after opening a different completed course.
+  need N proofs, each made after opening a different completed course. The real `policy.json` uses
+  `min_count: 1` for the live demo (one completed course was available); the test policy and fixtures
+  keep `min_count: 2` to exercise dedup and thresholds. Raising it is a one-line policy change.
 - **Coursera is designed, not shipped.** No public Reclaim provider exists; a custom provider on the logged-in
   accomplishments API is needed. The policy block is in place, but no Coursera proof has been made.
 - **Solidity ↔ Rust encoding not cross-checked.** `contracts/` tests use Solidity-encoded public values;
