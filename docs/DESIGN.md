@@ -6,8 +6,8 @@ Course platforms already publish certificate links, so "this certificate exists"
 anyone can share someone else's link. EulerPhi's Phi platform wants *verified experts* without
 collecting personal data. Two things are needed:
 
-1. **zkTLS**: prove a credential came from Udemy's or Coursera's own servers, *from the prover's
-   own logged-in account*, revealing only selected fields.
+1. **zkTLS**: prove a credential came from the platform's own servers (Udemy today; Coursera
+   designed, see §4), *from the prover's own logged-in account*, revealing only selected fields.
 2. **SP1**: turn several such credentials into one private, checkable statement that matters to
    Phi: *"this identity is a verified expert in industry X."*
 
@@ -109,11 +109,17 @@ Phi has many industries and attestor sets rotate. Making the policy an input kee
 ## 4. Known limitations
 
 - **Attestor trust** (see table). This is the main assumption of any proxy/attestor zkTLS design.
-- **Field mapping is per provider.** Real Udemy/Coursera providers' extracted field names and
-  endpoints must be confirmed from a real proof and pinned in `policy.json`.
-- **Courses vs certificates.** Udemy's public Reclaim provider exposes course title and
-  completion ratio. Completion of a paid course is what issues a Udemy certificate, but a
-  custom provider on the certificate endpoint (with certificate id + date) is stronger.
+- **Field mapping is per provider.** `policy.json` pins the "Udemy Course Name" provider's endpoint
+  (`/api-2.0/users/me/subscribed-courses/`) and fields (`title`, `completion_ratio`), taken from the
+  provider's definition (docs/PROVIDERS.md). Any other provider needs its own policy block.
+- **Courses vs certificates.** That provider exposes course title and completion ratio, with no
+  certificate id or date, so the claim is "completed courses". A custom provider on Udemy's
+  certificate endpoint would be stronger.
+- **One course per proof.** The provider reveals only `results[0]`, the most recently accessed
+  course. N courses need N proofs; a custom provider with more indices would fix this.
+- **Coursera is designed, not shipped.** No public Reclaim provider exists. A custom provider on the
+  logged-in accomplishments API is needed (not the public verify page, which anyone holding the
+  code could attest). The policy block exists; no Coursera proof has been made.
 - **Keyword industry mapping is naive.** A curated course-ID → industry map, or issuer-side
   tags, would be better.
 - **Evaluation time is chosen by the prover** (but public). A verifier should reject

@@ -47,8 +47,10 @@ Deadline: **Thursday 2026-10-29, end of day IST.** Scope is deliberately cut to 
 - `prover` — TypeScript: `request.ts` (real Reclaim proof, wallet-bound), `fixtures.ts`
   (test fixtures signed by a throwaway attestor via the SDK), `sdk-verify.ts` (SDK cross-check).
 - `fixtures/` — generated test data. `policy.test.json` trusts ONLY the test attestor.
-- `policy.json` — real policy. `attestors` is intentionally empty until filled from Reclaim's
-  live list (`npm run sdk-verify -- <proof> --online`).
+- `policy.json` — real policy. Trusts the 3 live Reclaim attestors (2026-10-28), accepts only the
+  "Udemy Course Name" endpoint/fields, `min_count: 1` for the live demo.
+- `contracts/` — `ExpertBadge.sol` (stretch) + Foundry tests against a mock SP1 verifier. Not deployed.
+- `docs/PROVIDERS.md` — Reclaim provider IDs, endpoints, fields, attestor list (research, with sources).
 - `docs/DESIGN.md` — HLD, LLD, threat model. `docs/PLAN.md` — status and next steps.
 
 ## Conventions
@@ -58,12 +60,20 @@ Deadline: **Thursday 2026-10-29, end of day IST.** Scope is deliberately cut to 
   tiny-keccak 2.0.2). Don't bump them casually.
 - Do NOT enable serde_json `preserve_order`: canonical JSON depends on sorted BTreeMap keys.
 - Every new rejection path gets a negative fixture + test.
-- `cargo test` (root) runs core tests without the SP1 toolchain.
+- `cargo test` (root) runs core tests without the SP1 toolchain. Rust is pinned to 1.91.1
+  (`rust-toolchain.toml`, needed by SP1 6.10 host crates); the guest builds on `succinct`.
 
-## Open items / known unknowns
+## Decisions made 2026-10-28 (after research, see docs/PROVIDERS.md)
 
-- Real Udemy/Coursera provider field names and endpoints: confirm from a real proof, then
-  tighten `path_prefixes` and key lists in `policy.json`.
-- Udemy's public provider exposes title + completion ratio, not certificate id/date. A custom
-  provider targeting the certificate endpoint is better ("certifications", not "courses").
-- Coursera may need a custom provider built in Reclaim's dev tool.
+8. **Udemy only is shipped; Coursera is a design.** No public Coursera provider exists on Reclaim;
+   a custom provider would need Reclaim review, which doesn't fit the deadline.
+9. **Claim wording is "completed courses", not "certificates".** The "Udemy Course Name" provider
+   (`3ef2059d-ec1e-4107-8187-e35157e527ad`) exposes `title` + `completion_ratio` only, and only for the
+   most recently accessed course (one course per proof). Dedup falls back to normalized title.
+10. **`policy.json` `min_count: 1`** for the live demo (one completed course available). Test
+    policy keeps 2.
+
+## Open items
+
+- Confirm from the first real proof: signer is one of the 3 attestors; `completion_ratio` is 0–100.
+- Rust ↔ Solidity `PublicValuesStruct` encoding is not cross-checked in a test (deliberately skipped).

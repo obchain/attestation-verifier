@@ -14,8 +14,8 @@ Deadline: **Thu 2026-10-29, end of day IST**.
 
 ## Needs a human (candidate)
 
-- [ ] Reclaim dev account: APP_ID / APP_SECRET, pick Udemy + Coursera provider IDs → `prover/.env`
-- [ ] Udemy account with ≥1 completed paid course (ideally Coursera certificate too)
+- [x] Reclaim dev account: APP_ID / APP_SECRET + Udemy Course Name provider → `prover/.env`
+- [ ] Udemy account with ≥1 completed course whose title matches the industry (in progress)
 - [x] Install SP1: `curl -L https://sp1up.succinct.xyz | bash && sp1up --version 6.10.0` (+ `brew install protobuf`)
 
 ## Next (Wed evening → Thu)
@@ -26,10 +26,12 @@ Deadline: **Thu 2026-10-29, end of day IST**.
    — SP1 6.10.0, 1,110,897 cycles, compressed prove 146 s wall on M-series (19.5 GB peak RSS),
    proof.bin 1.27 MB, vkey `0x00f7542b4a7d932944f31c68acde3fa578798ee1410bb62bf3754f5ee975a58b`.
    Rogue-attestor fixture panics the guest in the zkVM (fail closed).
-3. Real Udemy proof: `cd prover && npm run request -- --platform udemy --wallet 0x...`
-4. `npm run sdk-verify -- ../proofs/<file>.json --online` → copy attestor address into
-   `policy.json`, confirm field names + endpoint path, tighten `path_prefixes`
-5. `zkcert check --proofs-dir proofs --policy policy.json --wallet 0x...` then `prove`
-6. Coursera: timebox 2h (public provider or custom provider). Document if partial.
-7. Record 2–3 min demo; final README pass.
-8. Stretch (only if done by ~3 pm Thu): Groth16 + `ExpertBadge.sol` on a testnet.
+3. [x] `policy.json`: 3 live attestors, Udemy endpoint + fields pinned, `min_count: 1` (docs/PROVIDERS.md)
+4. [ ] Real Udemy proof: `cd prover && npm run request -- --platform udemy --wallet 0x...`
+5. [ ] `npm run sdk-verify -- ../proofs/<file>.json --online`: signer ∈ policy attestors,
+   `completion_ratio` scale 0–100
+6. [ ] `zkcert check --proofs-dir proofs --policy policy.json --wallet 0x...` then `prove` + `verify`
+7. [x] Coursera: no public Reclaim provider; documented as design (README Limitations, PROVIDERS.md)
+8. [ ] Record 2–3 min demo (docs/DEMO.md); final README pass
+9. [x] `ExpertBadge.sol` + 10 Foundry tests (mock verifier). [ ] Groth16 + testnet deploy:
+   stretch, only if steps 4–8 are done by ~3 pm Thu
