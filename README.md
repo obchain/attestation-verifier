@@ -57,7 +57,7 @@ cargo test            # 19 tests: SDK compatibility, happy path, forgery/replay/
 **2. Prove with fixtures**
 
 ```bash
-curl -L https://sp1up.succinct.xyz | bash && sp1up   # SP1 toolchain (once)
+curl -L https://sp1up.succinct.xyz | bash && sp1up --version 6.10.0   # matches sp1-sdk pin
 brew install protobuf   # sp1-sdk's build script needs `protoc` (apt: protobuf-compiler)
 cd script               # host builds on Rust 1.91.1 (rust-toolchain.toml); guest on `succinct`
 cargo run --release -- check   --input ../fixtures/input.test.json   # native dry run
