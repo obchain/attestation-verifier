@@ -1,0 +1,11 @@
+[profile.default]
+src = "src"
+test = "test"
+out = "out"
+libs = []
+# Zero dependencies: no forge-std, no sp1-contracts. Compiler already cached locally.
+solc_version = "0.8.28"
+offline = true
+
+[fmt]
+line_length = 120
