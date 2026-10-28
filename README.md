@@ -110,6 +110,14 @@ exist over a bad input. Valid but irrelevant credentials just don't count.
 **Policy as input, hash as output.** One program and verification key serves every Phi industry;
 the verifier pins the `policyHash` it accepts.
 
+**EVM wallet binding; chain-agnostic proof.** The brief names no chain. Proofs bind to a 20-byte EVM
+address because that is Reclaim's `contextAddress` convention, and SP1's primary on-chain verifier is
+Solidity (`contracts/ExpertBadge.sol`). Nothing chain-specific runs inside the proof: the attestor's
+secp256k1 signature is checked in the zkVM either way. **Solana path:** bind `contextAddress` to a
+base58 ed25519 public key (`parse_address` and `ProgramInput.wallet` → 32 bytes, `address wallet` →
+`bytes32` in `PublicValuesStruct`), and verify the Groth16 proof on-chain with Succinct's `sp1-solana`
+verifier from an Anchor program instead of `ExpertBadge.sol`.
+
 ## What is proven, precisely
 
 For public `(wallet, policyHash, industry, minCount, qualifiedCount, passed, certSetCommitment, evaluatedAt)`,
