@@ -1,0 +1,210 @@
+{
+  "proofs": [
+    {
+      "identifier": "0x2459edcb9c225953a6aaa229d37c96ff3c72701f0cd11cbcc8616d83e8e7eb60",
+      "claimData": {
+        "provider": "http",
+        "parameters": "{\"body\":\"\",\"method\":\"GET\",\"paramValues\":{},\"responseMatches\":[{\"type\":\"regex\",\"value\":\"\\\"title\\\":\\\"?(?<title>[^\\\",}]+)\"},{\"type\":\"regex\",\"value\":\"\\\"completion_ratio\\\":\\\"?(?<completion_ratio>[^\\\",}]+)\"},{\"type\":\"regex\",\"value\":\"\\\"certificate_id\\\":\\\"?(?<certificate_id>[^\\\",}]+)\"}],\"responseRedactions\":[{\"jsonPath\":\"$..title\"},{\"jsonPath\":\"$..completion_ratio\"},{\"jsonPath\":\"$..certificate_id\"}],\"url\":\"https://www.udemy.com/api-2.0/users/me/subscribed-courses/?fields[course]=title,completion_ratio\"}",
+        "owner": "0xdee129a48c325482d250f29ce0759a343161803c",
+        "timestampS": 1793167200,
+        "context": "{\"contextAddress\":\"0x5Aae27DacAf8b6b7A6eEA2406bf356F105cae7C5\",\"contextMessage\":\"eulerphi-zkcert:v1:nonce-udemy-solidity\",\"extractedParameters\":{\"title\":\"Ethereum and Solidity: The Complete Developer's Guide\",\"completion_ratio\":\"100\",\"certificate_id\":\"UC-11111111\"},\"providerHash\":\"0x85e3157c973b93373dc395c614975139e27c65cd7645d99affec81d7e64dda29\"}",
+        "identifier": "0x2459edcb9c225953a6aaa229d37c96ff3c72701f0cd11cbcc8616d83e8e7eb60",
+        "epoch": 1
+      },
+      "signatures": [
+        "0x9f344c3ce273df7ce0d9a22f133de6bd235923cdb6a2f6043a4c92a097e0d64e051e4d14f966cc9a9a7226ab556d868ce66526cb015b7c9c1d658eae394c40f51b"
+      ],
+      "witnesses": [
+        {
+          "id": "0x68312734a46b122dd45cd408d9317a2858114347",
+          "url": "wss://test-attestor.invalid/ws"
+        }
+      ],
+      "publicData": null
+    },
+    {
+      "identifier": "0x451d1e81657145e761ec70110e733dda87f5483be04defcb54f962220b9b2d5d",
+      "claimData": {
+        "provider": "http",
+        "parameters": "{\"body\":\"\",\"method\":\"GET\",\"paramValues\":{},\"responseMatches\":[{\"type\":\"regex\",\"value\":\"\\\"courseName\\\":\\\"?(?<courseName>[^\\\",}]+)\"},{\"type\":\"regex\",\"value\":\"\\\"verifyCode\\\":\\\"?(?<verifyCode>[^\\\",}]+)\"}],\"responseRedactions\":[{\"jsonPath\":\"$..courseName\"},{\"jsonPath\":\"$..verifyCode\"}],\"url\":\"https://www.coursera.org/api/memberships.v1?q=me&includes=courseId,certificate\"}",
+        "owner": "0xdee129a48c325482d250f29ce0759a343161803c",
+        "timestampS": 1793167200,
+        "context": "{\"contextAddress\":\"0x5Aae27DacAf8b6b7A6eEA2406bf356F105cae7C5\",\"contextMessage\":\"eulerphi-zkcert:v1:nonce-coursera-blockchain\",\"extractedParameters\":{\"courseName\":\"Blockchain Basics\",\"verifyCode\":\"ABCD1234EFGH\"},\"providerHash\":\"0xaf9c36773b6ea058044021de924635c45ea5821ce363b154541b98567d90aeba\"}",
+        "identifier": "0x451d1e81657145e761ec70110e733dda87f5483be04defcb54f962220b9b2d5d",
+        "epoch": 1
+      },
+      "signatures": [
+        "0xbb92a7f3aeb03c1acf24c81cc56c52d53687d9321a625b4da2309fc02180765a3b6e64cbe6b20f4303bc1df590e7ebcb1c13873eef4e75c48055c858fb2f00511b"
+      ],
+      "witnesses": [
+        {
+          "id": "0x68312734a46b122dd45cd408d9317a2858114347",
+          "url": "wss://test-attestor.invalid/ws"
+        }
+      ],
+      "publicData": null
+    },
+    {
+      "identifier": "0x2cc24cc9d66cb3a4b1851ba33ab83cfe5532985a110dcd0e1cf66ba1b2e16f01",
+      "claimData": {
+        "provider": "http",
+        "parameters": "{\"body\":\"\",\"method\":\"GET\",\"paramValues\":{},\"responseMatches\":[{\"type\":\"regex\",\"value\":\"\\\"title\\\":\\\"?(?<title>[^\\\",}]+)\"},{\"type\":\"regex\",\"value\":\"\\\"completion_ratio\\\":\\\"?(?<completion_ratio>[^\\\",}]+)\"},{\"type\":\"regex\",\"value\":\"\\\"certificate_id\\\":\\\"?(?<certificate_id>[^\\\",}]+)\"}],\"responseRedactions\":[{\"jsonPath\":\"$..title\"},{\"jsonPath\":\"$..completion_ratio\"},{\"jsonPath\":\"$..certificate_id\"}],\"url\":\"https://www.udemy.com/api-2.0/users/me/subscribed-courses/?fields[course]=title,completion_ratio\"}",
+        "owner": "0xdee129a48c325482d250f29ce0759a343161803c",
+        "timestampS": 1793167200,
+        "context": "{\"contextAddress\":\"0x5Aae27DacAf8b6b7A6eEA2406bf356F105cae7C5\",\"contextMessage\":\"eulerphi-zkcert:v1:nonce-udemy-zk\",\"extractedParameters\":{\"title\":\"Zero-Knowledge Proofs in Rust\",\"completion_ratio\":\"100\",\"certificate_id\":\"UC-33333333\"},\"providerHash\":\"0x85e3157c973b93373dc395c614975139e27c65cd7645d99affec81d7e64dda29\"}",
+        "identifier": "0x2cc24cc9d66cb3a4b1851ba33ab83cfe5532985a110dcd0e1cf66ba1b2e16f01",
+        "epoch": 1
+      },
+      "signatures": [
+        "0x4a43db7a20d556bf802dfe7a792e20beee5dacbda5bebe6adc64d2311622f4ed3e53f83815b67762b5e972671c519d5aebe55a43fd11c049beb5078a18c7ef0d1b"
+      ],
+      "witnesses": [
+        {
+          "id": "0x68312734a46b122dd45cd408d9317a2858114347",
+          "url": "wss://test-attestor.invalid/ws"
+        }
+      ],
+      "publicData": null
+    },
+    {
+      "identifier": "0x580da85e004bde9df8b728acc73cfa6376091ebe537f40426041888a8538046c",
+      "claimData": {
+        "provider": "http",
+        "parameters": "{\"body\":\"\",\"method\":\"GET\",\"paramValues\":{},\"responseMatches\":[{\"type\":\"regex\",\"value\":\"\\\"title\\\":\\\"?(?<title>[^\\\",}]+)\"},{\"type\":\"regex\",\"value\":\"\\\"completion_ratio\\\":\\\"?(?<completion_ratio>[^\\\",}]+)\"},{\"type\":\"regex\",\"value\":\"\\\"certificate_id\\\":\\\"?(?<certificate_id>[^\\\",}]+)\"}],\"responseRedactions\":[{\"jsonPath\":\"$..title\"},{\"jsonPath\":\"$..completion_ratio\"},{\"jsonPath\":\"$..certificate_id\"}],\"url\":\"https://www.udemy.com/api-2.0/users/me/subscribed-courses/?fields[course]=title,completion_ratio\"}",
+        "owner": "0xdee129a48c325482d250f29ce0759a343161803c",
+        "timestampS": 1793167200,
+        "context": "{\"contextAddress\":\"0x5Aae27DacAf8b6b7A6eEA2406bf356F105cae7C5\",\"contextMessage\":\"eulerphi-zkcert:v1:nonce-udemy-web3-incomplete\",\"extractedParameters\":{\"title\":\"Web3 dApp Bootcamp\",\"completion_ratio\":\"45\",\"certificate_id\":\"\"},\"providerHash\":\"0x85e3157c973b93373dc395c614975139e27c65cd7645d99affec81d7e64dda29\"}",
+        "identifier": "0x580da85e004bde9df8b728acc73cfa6376091ebe537f40426041888a8538046c",
+        "epoch": 1
+      },
+      "signatures": [
+        "0x890dc38458d105436df15639bc565d91945139dc0e8ddda518463657a24f7a1c7c885b3e9a5c130baa0f2ab0bcf6877aff66e57f56f84805fe2606a0349c1e301c"
+      ],
+      "witnesses": [
+        {
+          "id": "0x68312734a46b122dd45cd408d9317a2858114347",
+          "url": "wss://test-attestor.invalid/ws"
+        }
+      ],
+      "publicData": null
+    },
+    {
+      "identifier": "0x29c7b7f0d9f4e12e9aed1b6094da1588b6a52f02809b08066322c0aa87a558d6",
+      "claimData": {
+        "provider": "http",
+        "parameters": "{\"body\":\"\",\"method\":\"GET\",\"paramValues\":{},\"responseMatches\":[{\"type\":\"regex\",\"value\":\"\\\"courseName\\\":\\\"?(?<courseName>[^\\\",}]+)\"},{\"type\":\"regex\",\"value\":\"\\\"verifyCode\\\":\\\"?(?<verifyCode>[^\\\",}]+)\"}],\"responseRedactions\":[{\"jsonPath\":\"$..courseName\"},{\"jsonPath\":\"$..verifyCode\"}],\"url\":\"https://www.coursera.org/api/memberships.v1?q=me&includes=courseId,certificate\"}",
+        "owner": "0xdee129a48c325482d250f29ce0759a343161803c",
+        "timestampS": 1793167200,
+        "context": "{\"contextAddress\":\"0x5Aae27DacAf8b6b7A6eEA2406bf356F105cae7C5\",\"contextMessage\":\"eulerphi-zkcert:v1:nonce-coursera-ml\",\"extractedParameters\":{\"courseName\":\"Machine Learning Specialization\",\"verifyCode\":\"ML99887766\"},\"providerHash\":\"0xaf9c36773b6ea058044021de924635c45ea5821ce363b154541b98567d90aeba\"}",
+        "identifier": "0x29c7b7f0d9f4e12e9aed1b6094da1588b6a52f02809b08066322c0aa87a558d6",
+        "epoch": 1
+      },
+      "signatures": [
+        "0x44e4e31d2cdd3229738af8fe1695a82237f8d8e31ae1e1040906a14d979b431a7d14118f8fc290044e5381e818df02252b45281bda76477cf22b0f72384b57b71b"
+      ],
+      "witnesses": [
+        {
+          "id": "0x68312734a46b122dd45cd408d9317a2858114347",
+          "url": "wss://test-attestor.invalid/ws"
+        }
+      ],
+      "publicData": null
+    },
+    {
+      "identifier": "0xe7ae30429acdc6c2a958aea77dc39176c5abb82f11194cc15c67f4be640e9bad",
+      "claimData": {
+        "provider": "http",
+        "parameters": "{\"body\":\"\",\"method\":\"GET\",\"paramValues\":{},\"responseMatches\":[{\"type\":\"regex\",\"value\":\"\\\"title\\\":\\\"?(?<title>[^\\\",}]+)\"},{\"type\":\"regex\",\"value\":\"\\\"completion_ratio\\\":\\\"?(?<completion_ratio>[^\\\",}]+)\"},{\"type\":\"regex\",\"value\":\"\\\"certificate_id\\\":\\\"?(?<certificate_id>[^\\\",}]+)\"}],\"responseRedactions\":[{\"jsonPath\":\"$..title\"},{\"jsonPath\":\"$..completion_ratio\"},{\"jsonPath\":\"$..certificate_id\"}],\"url\":\"https://www.udemy.com/api-2.0/users/me/subscribed-courses/?fields[course]=title,completion_ratio\"}",
+        "owner": "0xdee129a48c325482d250f29ce0759a343161803c",
+        "timestampS": 1793167200,
+        "context": "{\"contextAddress\":\"0x5Aae27DacAf8b6b7A6eEA2406bf356F105cae7C5\",\"contextMessage\":\"eulerphi-zkcert:v1:nonce-udemy-solidity-duplicate\",\"extractedParameters\":{\"title\":\"Ethereum and Solidity: The Complete Developer's Guide\",\"completion_ratio\":\"100\",\"certificate_id\":\"UC-11111111\"},\"providerHash\":\"0x85e3157c973b93373dc395c614975139e27c65cd7645d99affec81d7e64dda29\"}",
+        "identifier": "0xe7ae30429acdc6c2a958aea77dc39176c5abb82f11194cc15c67f4be640e9bad",
+        "epoch": 1
+      },
+      "signatures": [
+        "0xf0eeebf7f9c752845b395953ff7fcb0179a9699741de3bd4fca5aa5348ed9b797aff99f96012c26af65f276a6d86ba3f24dbb323bf9df0948cec66dce48c25311b"
+      ],
+      "witnesses": [
+        {
+          "id": "0x68312734a46b122dd45cd408d9317a2858114347",
+          "url": "wss://test-attestor.invalid/ws"
+        }
+      ],
+      "publicData": null
+    }
+  ],
+  "policy": {
+    "version": 1,
+    "context_tag": "eulerphi-zkcert:v1",
+    "attestors": [
+      "0x68312734a46b122dd45cd408d9317a2858114347"
+    ],
+    "platforms": [
+      {
+        "name": "udemy",
+        "hosts": [
+          "www.udemy.com"
+        ],
+        "path_prefixes": [
+          "/api-2.0/users/me/"
+        ],
+        "title_keys": [
+          "title",
+          "course_title"
+        ],
+        "completion_keys": [
+          "completion_ratio",
+          "completionRatio"
+        ],
+        "completion_is_fraction": false,
+        "cert_id_keys": [
+          "certificate_id",
+          "cert_id"
+        ]
+      },
+      {
+        "name": "coursera",
+        "hosts": [
+          "www.coursera.org"
+        ],
+        "path_prefixes": [
+          "/api/"
+        ],
+        "title_keys": [
+          "courseName",
+          "title",
+          "name"
+        ],
+        "completion_keys": [],
+        "completion_is_fraction": false,
+        "cert_id_keys": [
+          "verifyCode",
+          "certificate_id"
+        ]
+      }
+    ],
+    "industry": {
+      "id": "crypto",
+      "keywords": [
+        "blockchain",
+        "ethereum",
+        "solidity",
+        "smart contract",
+        "smart contracts",
+        "web3",
+        "defi",
+        "cryptography",
+        "zero-knowledge",
+        "zero knowledge",
+        "zk*",
+        "bitcoin",
+        "solana"
+      ]
+    },
+    "min_count": 2,
+    "min_completion_pct": 100,
+    "max_age_secs": 15552000
+  },
+  "wallet": "0x5Aae27DacAf8b6b7A6eEA2406bf356F105cae7C5",
+  "evaluated_at": 1793170800
+}

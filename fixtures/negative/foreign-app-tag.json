@@ -1,0 +1,22 @@
+{
+  "identifier": "0xef414a64e5d7a4f4ace2d2f5741756f54ff9d5622e42bd8e1b16796f4105b4e5",
+  "claimData": {
+    "provider": "http",
+    "parameters": "{\"body\":\"\",\"method\":\"GET\",\"paramValues\":{},\"responseMatches\":[{\"type\":\"regex\",\"value\":\"\\\"title\\\":\\\"?(?<title>[^\\\",}]+)\"},{\"type\":\"regex\",\"value\":\"\\\"completion_ratio\\\":\\\"?(?<completion_ratio>[^\\\",}]+)\"},{\"type\":\"regex\",\"value\":\"\\\"certificate_id\\\":\\\"?(?<certificate_id>[^\\\",}]+)\"}],\"responseRedactions\":[{\"jsonPath\":\"$..title\"},{\"jsonPath\":\"$..completion_ratio\"},{\"jsonPath\":\"$..certificate_id\"}],\"url\":\"https://www.udemy.com/api-2.0/users/me/subscribed-courses/?fields[course]=title,completion_ratio\"}",
+    "owner": "0xdee129a48c325482d250f29ce0759a343161803c",
+    "timestampS": 1793167200,
+    "context": "{\"contextAddress\":\"0x5Aae27DacAf8b6b7A6eEA2406bf356F105cae7C5\",\"contextMessage\":\"some-other-app:v1:nonce-foreign-app-tag\",\"extractedParameters\":{\"title\":\"Solidity Security\",\"completion_ratio\":\"100\",\"certificate_id\":\"UC-8\"},\"providerHash\":\"0x85e3157c973b93373dc395c614975139e27c65cd7645d99affec81d7e64dda29\"}",
+    "identifier": "0xef414a64e5d7a4f4ace2d2f5741756f54ff9d5622e42bd8e1b16796f4105b4e5",
+    "epoch": 1
+  },
+  "signatures": [
+    "0xc42e0d42eccd72c6dbdf0ae3d771f612752b45e05af188618b4997bab880a8e728638b3568131325bf9aa0a2f7070a544d55ec19550176995c10eca4096bb33a1b"
+  ],
+  "witnesses": [
+    {
+      "id": "0x68312734a46b122dd45cd408d9317a2858114347",
+      "url": "wss://test-attestor.invalid/ws"
+    }
+  ],
+  "publicData": null
+}

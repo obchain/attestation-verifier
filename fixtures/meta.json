@@ -1,0 +1,12 @@
+{
+  "note": "TEST ONLY. Throwaway keys derived from public labels. Never trust these addresses.",
+  "test_attestor": "0x68312734a46b122dd45cd408d9317a2858114347",
+  "rogue_attestor": "0xff5d9c0b54d54dd8325ddf6311087b17e407a195",
+  "user_wallet": "0x5Aae27DacAf8b6b7A6eEA2406bf356F105cae7C5",
+  "other_wallet": "0x019c401dEcBbA1a0228d013DCaDd40b47d73D161",
+  "evaluated_at": 1793170800,
+  "expected": {
+    "qualified_count": 3,
+    "passed": true
+  }
+}

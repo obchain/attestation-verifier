@@ -1,0 +1,23 @@
+{
+  "name": "eulerphi-zkcert-prover",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "zkTLS side: requests Reclaim proofs of Udemy/Coursera certificates bound to a wallet, and generates test fixtures.",
+  "scripts": {
+    "request": "tsx src/request.ts",
+    "fixtures": "tsx src/fixtures.ts",
+    "sdk-verify": "tsx src/sdk-verify.ts"
+  },
+  "dependencies": {
+    "@reclaimprotocol/js-sdk": "5.8.3",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.4",
+    "qrcode-terminal": "^0.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

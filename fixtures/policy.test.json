@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "context_tag": "eulerphi-zkcert:v1",
+  "attestors": [
+    "0x68312734a46b122dd45cd408d9317a2858114347"
+  ],
+  "platforms": [
+    {
+      "name": "udemy",
+      "hosts": [
+        "www.udemy.com"
+      ],
+      "path_prefixes": [
+        "/api-2.0/users/me/"
+      ],
+      "title_keys": [
+        "title",
+        "course_title"
+      ],
+      "completion_keys": [
+        "completion_ratio",
+        "completionRatio"
+      ],
+      "completion_is_fraction": false,
+      "cert_id_keys": [
+        "certificate_id",
+        "cert_id"
+      ]
+    },
+    {
+      "name": "coursera",
+      "hosts": [
+        "www.coursera.org"
+      ],
+      "path_prefixes": [
+        "/api/"
+      ],
+      "title_keys": [
+        "courseName",
+        "title",
+        "name"
+      ],
+      "completion_keys": [],
+      "completion_is_fraction": false,
+      "cert_id_keys": [
+        "verifyCode",
+        "certificate_id"
+      ]
+    }
+  ],
+  "industry": {
+    "id": "crypto",
+    "keywords": [
+      "blockchain",
+      "ethereum",
+      "solidity",
+      "smart contract",
+      "smart contracts",
+      "web3",
+      "defi",
+      "cryptography",
+      "zero-knowledge",
+      "zero knowledge",
+      "zk*",
+      "bitcoin",
+      "solana"
+    ]
+  },
+  "min_count": 2,
+  "min_completion_pct": 100,
+  "max_age_secs": 15552000
+}

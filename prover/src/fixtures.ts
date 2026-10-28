@@ -1,0 +1,176 @@
+/**
+ * Generates deterministic TEST fixtures in Reclaim's exact proof format.
+ *
+ * Why: real Reclaim proofs need a logged-in Udemy/Coursera account and a phone
+ * or browser extension, which CI and reviewers don't have. These fixtures are
+ * signed with a throwaway "test attestor" key, using the official SDK's own
+ * `createSignDataForClaim` / `getIdentifierFromClaimInfo`, so the signing format
+ * is byte-for-byte what real attestors sign. The test policy trusts ONLY the
+ * test attestor; the real policy trusts ONLY Reclaim's attestors, so fixtures
+ * can never pass under the real policy.
+ *
+ * Output: ../fixtures/{policy.test.json, input.test.json, negative/*.json}
+ */
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { Wallet, keccak256, toUtf8Bytes } from "ethers";
+import { createSignDataForClaim, getIdentifierFromClaimInfo } from "@reclaimprotocol/js-sdk";
+
+const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "fixtures");
+mkdirSync(join(root, "negative"), { recursive: true });
+
+// Deterministic throwaway keys. NEVER use these for anything real.
+const key = (label: string) => keccak256(toUtf8Bytes(`eulerphi-zkcert-test:${label}`));
+const testAttestor = new Wallet(key("attestor"));
+const rogueAttestor = new Wallet(key("rogue-attestor"));
+const sessionOwner = new Wallet(key("reclaim-session-owner"));
+const userWallet = new Wallet(key("user-wallet")).address;
+const otherWallet = new Wallet(key("someone-else")).address;
+
+const CONTEXT_TAG = "eulerphi-zkcert:v1";
+const T0 = Date.UTC(2026, 9, 28, 6, 0, 0) / 1000; // 2026-10-28 06:00 UTC
+const EVALUATED_AT = T0 + 3600;
+
+type Platform = "udemy" | "coursera";
+
+const ENDPOINT: Record<Platform, string> = {
+  udemy:
+    "https://www.udemy.com/api-2.0/users/me/subscribed-courses/?fields[course]=title,completion_ratio",
+  coursera: "https://www.coursera.org/api/memberships.v1?q=me&includes=courseId,certificate",
+};
+
+interface Spec {
+  name: string;
+  platform: Platform;
+  fields: Record<string, string>;
+  wallet?: string;
+  tag?: string;
+  ts?: number;
+  url?: string;
+  signer?: Wallet;
+}
+
+function makeProof(s: Spec) {
+  const parameters = JSON.stringify({
+    body: "",
+    method: "GET",
+    paramValues: {},
+    responseMatches: Object.keys(s.fields).map((k) => ({
+      type: "regex",
+      value: `"${k}":"?(?<${k}>[^",}]+)`,
+    })),
+    responseRedactions: Object.keys(s.fields).map((k) => ({ jsonPath: `$..${k}` })),
+    url: s.url ?? ENDPOINT[s.platform],
+  });
+  const context = JSON.stringify({
+    contextAddress: s.wallet ?? userWallet,
+    contextMessage: `${s.tag ?? CONTEXT_TAG}:nonce-${s.name}`,
+    extractedParameters: s.fields,
+    providerHash: keccak256(toUtf8Bytes(`provider:${s.platform}`)),
+  });
+  const claim = {
+    provider: "http",
+    parameters,
+    owner: sessionOwner.address.toLowerCase(),
+    timestampS: s.ts ?? T0,
+    context,
+    identifier: "",
+    epoch: 1,
+  };
+  claim.identifier = getIdentifierFromClaimInfo(claim);
+  const signer = s.signer ?? testAttestor;
+  const signature = signer.signMessageSync(createSignDataForClaim(claim));
+  return {
+    identifier: claim.identifier,
+    claimData: claim,
+    signatures: [signature],
+    witnesses: [{ id: signer.address.toLowerCase(), url: "wss://test-attestor.invalid/ws" }],
+    publicData: null,
+  };
+}
+
+const udemy = (title: string, completion: string, certId: string) => ({
+  title,
+  completion_ratio: completion,
+  certificate_id: certId,
+});
+const coursera = (courseName: string, verifyCode: string) => ({ courseName, verifyCode });
+
+// The happy-path set: 3 distinct crypto credentials + noise.
+const valid: Spec[] = [
+  { name: "udemy-solidity", platform: "udemy", fields: udemy("Ethereum and Solidity: The Complete Developer's Guide", "100", "UC-11111111") },
+  { name: "coursera-blockchain", platform: "coursera", fields: coursera("Blockchain Basics", "ABCD1234EFGH") },
+  { name: "udemy-zk", platform: "udemy", fields: udemy("Zero-Knowledge Proofs in Rust", "100", "UC-33333333") },
+  { name: "udemy-web3-incomplete", platform: "udemy", fields: udemy("Web3 dApp Bootcamp", "45", "") },
+  { name: "coursera-ml", platform: "coursera", fields: coursera("Machine Learning Specialization", "ML99887766") },
+  { name: "udemy-solidity-duplicate", platform: "udemy", fields: udemy("Ethereum and Solidity: The Complete Developer's Guide", "100", "UC-11111111") },
+];
+
+// Each must make the SP1 program abort.
+const negative: Spec[] = [
+  { name: "other-wallet", platform: "udemy", wallet: otherWallet, fields: udemy("Solidity Security", "100", "UC-4") },
+  { name: "rogue-attestor", platform: "udemy", signer: rogueAttestor, fields: udemy("Solidity Security", "100", "UC-5") },
+  { name: "look-alike-host", platform: "udemy", url: "https://www.udemy.com.evil.example/api-2.0/users/me/", fields: udemy("Solidity Security", "100", "UC-6") },
+  { name: "wrong-endpoint", platform: "udemy", url: "https://www.udemy.com/course/some-public-page/", fields: udemy("Solidity Security", "100", "UC-7") },
+  { name: "foreign-app-tag", platform: "udemy", tag: "some-other-app:v1", fields: udemy("Solidity Security", "100", "UC-8") },
+  { name: "stale", platform: "udemy", ts: T0 - 400 * 86400, fields: udemy("Solidity Security", "100", "UC-9") },
+];
+
+const policy = {
+  version: 1,
+  context_tag: CONTEXT_TAG,
+  attestors: [testAttestor.address.toLowerCase()],
+  platforms: [
+    {
+      name: "udemy",
+      hosts: ["www.udemy.com"],
+      path_prefixes: ["/api-2.0/users/me/"],
+      title_keys: ["title", "course_title"],
+      completion_keys: ["completion_ratio", "completionRatio"],
+      completion_is_fraction: false,
+      cert_id_keys: ["certificate_id", "cert_id"],
+    },
+    {
+      name: "coursera",
+      hosts: ["www.coursera.org"],
+      path_prefixes: ["/api/"],
+      title_keys: ["courseName", "title", "name"],
+      completion_keys: [],
+      completion_is_fraction: false,
+      cert_id_keys: ["verifyCode", "certificate_id"],
+    },
+  ],
+  industry: {
+    id: "crypto",
+    keywords: [
+      "blockchain", "ethereum", "solidity", "smart contract", "smart contracts", "web3", "defi",
+      "cryptography", "zero-knowledge", "zero knowledge", "zk*", "bitcoin", "solana",
+    ],
+  },
+  min_count: 2,
+  min_completion_pct: 100,
+  max_age_secs: 180 * 86400,
+};
+
+const write = (rel: string, obj: unknown) =>
+  writeFileSync(join(root, rel), JSON.stringify(obj, null, 2) + "\n");
+
+write("policy.test.json", policy);
+write("input.test.json", {
+  proofs: valid.map(makeProof),
+  policy,
+  wallet: userWallet,
+  evaluated_at: EVALUATED_AT,
+});
+for (const n of negative) write(join("negative", `${n.name}.json`), makeProof(n));
+write("meta.json", {
+  note: "TEST ONLY. Throwaway keys derived from public labels. Never trust these addresses.",
+  test_attestor: testAttestor.address.toLowerCase(),
+  rogue_attestor: rogueAttestor.address.toLowerCase(),
+  user_wallet: userWallet,
+  other_wallet: otherWallet,
+  evaluated_at: EVALUATED_AT,
+  expected: { qualified_count: 3, passed: true },
+});
+console.log(`wrote fixtures to ${root}`);

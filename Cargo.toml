@@ -1,0 +1,40 @@
+[workspace]
+resolver = "2"
+members = ["crates/core", "program", "script"]
+# `cargo test` / `cargo build` at the root only touch the core crate, so the
+# repo builds on any machine. The SP1 program and script need the SP1 toolchain
+# (`sp1up`) and are built from `script/` (see README).
+default-members = ["crates/core"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[workspace.dependencies]
+eulerphi-core = { path = "crates/core" }
+serde = { version = "1", default-features = false, features = ["derive", "alloc"] }
+# NOTE: do NOT enable serde_json's `preserve_order`. The core relies on
+# `serde_json::Value` objects being BTreeMaps (sorted keys) to reproduce the
+# RFC 8785 canonical JSON that Reclaim hashes.
+serde_json = { version = "1", default-features = false, features = ["alloc", "std"] }
+# Versions pinned to the ones SP1 ships accelerated precompile patches for.
+k256 = { version = "=0.13.4", default-features = false, features = ["ecdsa", "alloc"] }
+sha2 = { version = "=0.10.8", default-features = false }
+tiny-keccak = { version = "=2.0.2", features = ["keccak"] }
+alloy-sol-types = { version = "1", default-features = false }
+alloy-primitives = { version = "1", default-features = false }
+hex = "0.4"
+sp1-zkvm = "6.10.0"
+sp1-sdk = "6.10.0"
+sp1-build = "6.10.0"
+tokio = { version = "1", features = ["full"] }
+clap = { version = "4", features = ["derive"] }
+
+# SP1 precompile patches: keccak, sha256 and secp256k1 run as native syscalls
+# inside the zkVM instead of being emulated in RISC-V (large cycle savings).
+# Natively they behave exactly like the upstream crates.
+[patch.crates-io]
+k256 = { git = "https://github.com/sp1-patches/elliptic-curves", tag = "patch-k256-13.4-sp1-6.10.0" }
+sha2-v0-10-8 = { git = "https://github.com/sp1-patches/RustCrypto-hashes", package = "sha2", tag = "patch-sha2-0.10.8-sp1-6.10.0" }
+tiny-keccak = { git = "https://github.com/sp1-patches/tiny-keccak", tag = "patch-2.0.2-sp1-6.10.0" }

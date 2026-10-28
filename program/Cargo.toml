@@ -1,0 +1,9 @@
+[package]
+name = "eulerphi-zkcert-program"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+sp1-zkvm = { workspace = true }
+eulerphi-core = { workspace = true }

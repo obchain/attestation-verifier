@@ -1,0 +1,22 @@
+[package]
+name = "eulerphi-zkcert-script"
+version.workspace = true
+edition.workspace = true
+default-run = "zkcert"
+publish = false
+
+[[bin]]
+name = "zkcert"
+path = "src/main.rs"
+
+[dependencies]
+eulerphi-core = { workspace = true }
+sp1-sdk = { workspace = true }
+tokio = { workspace = true }
+clap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+hex = { workspace = true }
+
+[build-dependencies]
+sp1-build = { workspace = true }

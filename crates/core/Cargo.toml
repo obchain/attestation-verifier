@@ -1,0 +1,16 @@
+[package]
+name = "eulerphi-core"
+description = "Verification logic shared by the SP1 guest and the host: Reclaim zkTLS proof checks, policy evaluation, public values."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+k256 = { workspace = true }
+sha2 = { workspace = true }
+tiny-keccak = { workspace = true }
+alloy-sol-types = { workspace = true }
+alloy-primitives = { workspace = true }
+hex = { workspace = true }
