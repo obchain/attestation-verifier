@@ -1,6 +1,6 @@
 # Plan and status
 
-Deadline: **Thu 2026-10-29, end of day IST**.
+Original deadline Thu 2026-10-29; extended to finish the live pipeline (2026-10-31/11-01).
 
 ## Done (Wed 28 Oct)
 
@@ -15,7 +15,7 @@ Deadline: **Thu 2026-10-29, end of day IST**.
 ## Needs a human (candidate)
 
 - [x] Reclaim dev account: APP_ID / APP_SECRET + Udemy Course Name provider → `prover/.env`
-- [ ] Udemy account with ≥1 completed course whose title matches the industry (in progress)
+- [x] Udemy account with ≥1 completed course whose title matches the industry
 - [x] Install SP1: `curl -L https://sp1up.succinct.xyz | bash && sp1up --version 6.10.0` (+ `brew install protobuf`)
 
 ## Next (Wed evening → Thu)
@@ -28,11 +28,17 @@ Deadline: **Thu 2026-10-29, end of day IST**.
    Rogue-attestor fixture panics the guest in the zkVM (fail closed).
    After the security-review fixes (provider hash, blinded commitment): 1,705,314 cycles.
 3. [x] `policy.json`: 3 live attestors, Udemy endpoint + fields pinned, `min_count: 1` (docs/PROVIDERS.md)
-4. [ ] Real Udemy proof: `cd prover && npm run request -- --platform udemy --wallet 0x...`
-5. [ ] `npm run sdk-verify -- ../proofs/<file>.json --online`: signer ∈ policy attestors,
-   `completion_ratio` scale 0–100
-6. [ ] `zkcert check --proofs-dir proofs --policy policy.json --wallet 0x...` then `prove` + `verify`
-7. [x] Coursera: no public Reclaim provider; documented as design (README Limitations, PROVIDERS.md)
-8. [ ] Record 2–3 min demo (docs/DEMO.md); final README pass
+4. [x] Real Udemy proof. Reclaim's hosted provider turned out stale and its builder was down
+   (docs/PROVIDERS.md §0), so: self-hosted attestor-core + `prover/src/attest.ts` with our own
+   request spec. Live claim 2026-10-31, committed as `fixtures/live/udemy.json`.
+5. [x] `sdk-verify`: SDK recomputes the identifier; `completion_ratio` is 0–100 (`100`).
+6. [x] `zkcert check` → COUNTED, `passed true`; `prove --system compressed` 76 s; `verify` VALID
+   (vkey `0x00ab7879f5ca22f155c50600e4209ac6b8e93c3e1eac1b42b7cbde0ac99439b8`).
+7. [ ] Coursera live: same approach (own request spec on the logged-in accomplishments API).
+   Needs a test account with a completed course.
+8. [x] README/DEMO/DESIGN rewritten for the live flow. [ ] Record the 2–3 min demo (docs/DEMO.md)
+10. [ ] Optional: second completed crypto course → live `min_count: 2`; one spec per `page=N`.
+11. [ ] Cleanup: log out of Udemy (cookies were shared in chat), delete `~/udemy.curl`,
+    rotate the Reclaim app secret, remove merged track branches/worktrees.
 9. [x] `ExpertBadge.sol` + 10 Foundry tests (mock verifier). [ ] Groth16 + testnet deploy:
    stretch, only if steps 4–8 are done by ~3 pm Thu

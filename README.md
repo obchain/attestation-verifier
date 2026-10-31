@@ -1,7 +1,8 @@
 # eulerphi-zkcert
 
 **Verified-expert proofs for Phi, from zkTLS-attested Udemy course completions, proven in SP1.**
-Coursera uses the same pipeline but needs a custom Reclaim provider (see [Limitations](#limitations)).
+Runs live end to end: a real Udemy account → our own zkTLS attestor → SP1 proof → `VALID`.
+Coursera uses the same pipeline with its own request spec (see [Limitations](#limitations)).
 
 > *"Wallet `0x5Aae…e7C5` holds at least 2 distinct, fully completed courses in the **Crypto**
 > industry, attested from udemy.com."*
@@ -22,7 +23,9 @@ collection. Its "Education" proof (degrees and professional certifications) need
 ## Architecture
 
 ```
-Udemy / Coursera ──TLS──▶ Reclaim attestor ──signed claim──▶ proofs/*.json
+Udemy ──TLS (via attestor)──▶ self-hosted attestor ──signed claim──▶ proofs/*.json
+        prover/src/attest.ts    (Reclaim attestor-core,
+        cookie stays private     ZK-checked redactions)
                                                                │
           policy.json (attestors, endpoints, industry, N) ─────┤
                                                                ▼
@@ -44,15 +47,15 @@ Full HLD, LLD and threat model: [docs/DESIGN.md](docs/DESIGN.md).
 | `crates/core` | All verification logic. Shared by zkVM guest and host, unit-tested natively |
 | `program` | SP1 guest: read input → `evaluate` → commit ABI-encoded public values |
 | `script` | `zkcert` CLI: `check`, `execute`, `prove`, `verify`, `vkey` |
-| `prover` | TypeScript zkTLS side: request real proofs, generate fixtures, SDK cross-check |
-| `fixtures` | Test proofs signed via the Reclaim SDK with a throwaway test attestor |
+| `prover` | TypeScript zkTLS side: `attest.ts` (live claims on our attestor), `request.ts` (Reclaim hosted flow), fixtures, SDK cross-check |
+| `fixtures` | Test proofs signed via the Reclaim SDK with a throwaway test attestor; `fixtures/live/` holds a real Udemy claim |
 
 ## Quick start
 
 **1. Tests (no SP1 toolchain needed)**
 
 ```bash
-cargo test            # 26 tests: SDK compatibility, happy path, forgery/replay/staleness/spec rejections
+cargo test            # 28 tests: SDK compatibility, a real Udemy claim, forgery/replay/staleness/spec rejections
 ```
 
 **2. Prove with fixtures**
@@ -82,17 +85,49 @@ qualified / min   3 / 2
 passed            true
 ```
 
-**3. Real credentials**
+**3. Live: your own Udemy account, your own attestor**
+
+Run the attestor (Reclaim's open-source [attestor-core](https://github.com/reclaimprotocol/attestor-core),
+tested at commit `dd43dc8`, Node ≥ 22):
 
 ```bash
-cd prover && npm install && cp .env.example .env   # fill in Reclaim app + provider IDs
-npm run request -- --platform udemy --wallet 0xYourWallet     # scan QR, log into Udemy
-npm run sdk-verify -- ../proofs/udemy-*.json --online          # signer must be one of policy.json "attestors"
-cd ../script
-cargo run --release -- prove --proofs-dir ../proofs --policy ../policy.json --wallet 0xYourWallet
+git clone https://github.com/reclaimprotocol/attestor-core ../attestor-core && cd ../attestor-core
+git checkout dd43dc8
+npm ci --omit=dev --ignore-scripts && npm run download:zk-files
+(umask 077; echo "PRIVATE_KEY=0x$(openssl rand -hex 32)" > .env.development)
+node --experimental-strip-types src/scripts/start-server.ts   # ws://localhost:8001/ws; logs signerAddress
 ```
 
+Put the logged `signerAddress` in `policy.json` `"attestors"` (ours, `0x3dafd19a…5485`, is already
+there). Then, logged into Udemy in Chrome: DevTools → Network → any `subscribed-courses` request →
+Copy as cURL, and `pbpaste > ~/udemy.curl && chmod 600 ~/udemy.curl`.
+
+```bash
+cd prover && npm install
+npm run attest -- --wallet 0xYourWallet          # claim on your most recently accessed course
+npm run sdk-verify -- ../proofs/udemy-*.json     # Reclaim's SDK recomputes the same identifier
+cd ../script
+cargo run --release -- check  --proofs-dir ../proofs --policy ../policy.json --wallet 0xYourWallet
+cargo run --release -- prove  --proofs-dir ../proofs --policy ../policy.json --wallet 0xYourWallet --blinding 0x…
+cargo run --release -- verify --proof proof.bin
+```
+
+Real run (2026-10-31): claim in 3.4 s (5 ZK proofs for the redactions), SP1 compressed proof in
+76 s, `proof is VALID`, `qualified 1 / 1`, `passed true`.
+
+Reclaim's hosted flow (`npm run request`) is kept: it works the same way once Reclaim's Udemy
+provider is fixed (see below).
+
 ## Design choices
+
+**Own attestor, Reclaim's protocol.** Reclaim's public "Udemy Course Name" provider is stale: it
+waits for `subscribed-courses?fields[course]=…completion_ratio…title…`, but Udemy's My Learning page
+now requests `fields[course]=archive_time,favorite_time,features,is_private,num_collections,tracking_id,url`,
+so the hosted flow never fires (evidence in [docs/PROVIDERS.md](docs/PROVIDERS.md#0-update-2026-10-31-the-hosted-provider-is-stale)).
+Reclaim's provider builder was also down (`GenerateSession UNKNOWN`). Instead of waiting, we run
+Reclaim's open-source attestor ourselves and send our own request spec, which asks Udemy for exactly
+`title,completion_ratio`. The claim format is unchanged, so the verifier didn't change a line: it checks
+the protocol, not the vendor. `policy.json` decides which attestors to trust.
 
 **Reclaim over TLSNotary.** Both are zkTLS. Reclaim's output is a secp256k1 attestor signature
 over a hashed claim, which SP1 verifies cheaply with its keccak and secp256k1 precompiles, and it
@@ -142,23 +177,31 @@ commitment reveals nothing about which courses, and two wallets with the same co
 | Self-declared title in `paramValues` | `negative/param-values-title` | `MissingField("title")` |
 | App tag that only shares a prefix (`…:v10`) | `negative/tag-prefix` | `WrongContextTag` |
 | Edit course title / wallet after signing | tamper tests | signature no longer recovers to attestor |
+| Real claim from an attestor the policy doesn't trust | `live/udemy.json` minus our attestor | `UntrustedAttestor` |
 | Submit same certificate twice | duplicate fixture | counted once |
 | Sneak one bad proof into a good set | fail-closed test | whole evaluation rejected |
 
 ## Limitations
 
-The main trust assumption is the Reclaim attestor set (`policy.json` pins the 3 live attestors as of
-2026-10-28). Industry matching uses keywords. Details and mitigations in
+The main trust assumption is the attestor set in `policy.json`: our own attestor plus Reclaim's 3 live
+attestors (as of 2026-10-28). **In this demo we run the attestor**, so we could sign anything; that is the
+same trust model as Reclaim's (a proxy attestor), with a different operator. In production Phi runs its
+own attestor(s), ideally several with k-of-n signatures or TEE attestation, and pins them. Industry
+matching uses keywords. Details and mitigations in
 [docs/DESIGN.md](docs/DESIGN.md#4-known-limitations); provider research in [docs/PROVIDERS.md](docs/PROVIDERS.md).
 
-- **Courses, not certificates.** Reclaim's public Udemy provider ("Udemy Course Name") exposes title and
-  `completion_ratio`, not a certificate id or date, so "completed" means 100% progress. Dedup falls back
-  to the normalized title.
-- **One course per proof.** That provider reveals only the most recently accessed course, so N courses
-  need N proofs, each made after opening a different completed course. The real `policy.json` uses
-  `min_count: 1` for the live demo (one completed course was available); the test policy and fixtures
-  keep `min_count: 2` to exercise dedup and thresholds. Raising it is a one-line policy change.
-- **Coursera is designed, not shipped.** No public Reclaim provider exists; a custom provider on the logged-in
-  accomplishments API is needed. The policy block is in place, but no Coursera proof has been made.
+- **Courses, not certificates.** The endpoint exposes title and `completion_ratio`, not a certificate
+  id or date, so "completed" means 100% progress. Dedup falls back to the normalized title.
+- **One course per proof.** Our request reveals only the most recently accessed course (`page_size=1`).
+  N courses need N proofs; pinning one provider hash per `page=N` URL would remove the need to reopen
+  courses. The real `policy.json` uses `min_count: 1` (one completed course on the test account); the
+  test policy and fixtures keep `min_count: 2` to exercise dedup and thresholds.
+- **Session capture is manual.** The demo takes the session cookie from a "Copy as cURL" file. A product
+  would capture it in a browser extension or in-app webview, as Reclaim's app does. The cookie is only
+  used inside the TLS session; the attestor sees it redacted.
+- **Coursera is designed, not shipped.** Same pipeline, needs its own request spec on the logged-in
+  accomplishments API. The policy block is in place, but no Coursera proof has been made.
+- **attestor-core is AGPL-3.0.** Fine for this demo; a product running a modified attestor as a
+  service must publish those changes.
 - **Solidity ↔ Rust encoding not cross-checked.** `contracts/` tests use Solidity-encoded public values;
   decoding a Rust-produced `PublicValuesStruct` in a test is still to do. Nothing is deployed.

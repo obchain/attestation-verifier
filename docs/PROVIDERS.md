@@ -3,6 +3,40 @@
 Research only; nothing in `policy.json` was changed. Confidence: **confirmed** (seen in a live API response / SDK source today), **likely**, **guess**.
 Provider JSON was read from Reclaim's public API `GET https://api.reclaimprotocol.org/api/providers/<id>` (no auth needed).
 
+## 0. Update 2026-10-31: the hosted provider is stale
+
+Sections 1–4 are the 2026-10-28 research. Trying it live showed that Reclaim's hosted flow cannot work today.
+
+**Evidence** (all confirmed, 2026-10-31):
+
+| What | Observed |
+|---|---|
+| Provider `3ef2059d…` request (API JSON, `urlType: TEMPLATE`, `expectedPageUrl: /home/my-courses/`) | `subscribed-courses/?ordering=-last_accessed&fields[course]=archive_time,buyable_object_type,completion_ratio,enrollment_time,favorite_time,features,image_240x135,image_480x270,is_practice_test_course,is_private,is_published,last_accessed_time,num_collections,published_title,title,tracking_id,url,visible_instructors&fields[user]=@min,job_title&page=1&page_size=12&is_archived=false` |
+| What Udemy's My Learning page requests now (browser network log, desktop **and** mobile viewport) | `subscribed-courses/?ordering=-last_accessed&fields[course]=archive_time,favorite_time,features,is_private,num_collections,tracking_id,url&page=1&page_size=12&is_archived=false`: no `title`, no `completion_ratio` |
+| Effect | The provider waits for a request that never happens; the Reclaim session sits on "Udemy running" forever. Not fixable from our side (no wrong page, account or mode) |
+| Other Udemy providers (`d787d917…` Course Count, `79c5741c…` Last Purchase) | Same stale URL, or the wrong data |
+| Reclaim provider builder (to make a corrected provider) | `ClientError: /channel.SessionService/GenerateSession UNKNOWN: Response closed without headers`, on 2026-10-30 and again 2026-10-31 |
+| Plain `curl` to the API with only `access_token` | `403` Cloudflare "Just a moment…" |
+
+**What we did instead.** Ran Reclaim's open-source attestor-core ourselves and sent our own request spec
+(`prover/src/attest.ts`):
+
+```
+GET https://www.udemy.com/api-2.0/users/me/subscribed-courses/?ordering=-last_accessed&page_size=1&fields[course]=title,completion_ratio
+responseMatches:    "title":"(?<title>…)"   "completion_ratio":(?<completion_ratio>\d+)
+responseRedactions: $.results[0].title, $.results[0].completion_ratio
+```
+
+Udemy answered `200` through the attestor: Cloudflare passed with the full browser cookie set and User-Agent.
+Response returned: `{"title":"Learn the secrets of Blockchain in less than an hour","completion_ratio":100}`, so
+`completion_ratio` is a 0–100 integer (resolves the "likely" in section 1). Provider hash of our spec:
+`0x1343d0b39a5c913c300ec51fec24ce816a2edabb08981b73b968c83398ff489c` (pinned in `policy.json`).
+Our attestor: `0x3dafd19a94d459d99b5154e8da32c932889d5485`.
+
+Also seen: the course player calls `/api-2.0/users/me/subscribed-courses/<id>/progress/` (has
+`first_completion_time`, a better "completed at" date) and the public `/api-2.0/courses/<id>/?fields[course]=title`.
+A stronger future spec could attest progress + date and map course ID → title separately.
+
 ## 1. Udemy providers — found
 
 | Provider | ID | Active / approved | Conf. |

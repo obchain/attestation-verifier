@@ -44,11 +44,15 @@ Deadline: **Thursday 2026-10-29, end of day IST.** Scope is deliberately cut to 
 - `crates/core` — ALL verification logic, shared by guest and host. Start here.
 - `program` — SP1 guest (tiny: read input → `evaluate` → commit ABI public values).
 - `script` — host CLI `zkcert` (`check | execute | prove | verify | vkey`). Needs SP1 toolchain.
-- `prover` — TypeScript: `request.ts` (real Reclaim proof, wallet-bound), `fixtures.ts`
+- `prover` — TypeScript: `attest.ts` (live claim on our self-hosted attestor), `request.ts` (Reclaim hosted flow, currently broken upstream), `fixtures.ts`
   (test fixtures signed by a throwaway attestor via the SDK), `sdk-verify.ts` (SDK cross-check).
 - `fixtures/` — generated test data. `policy.test.json` trusts ONLY the test attestor.
-- `policy.json` — real policy. Trusts the 3 live Reclaim attestors (2026-10-28), accepts only the
-  "Udemy Course Name" endpoint/fields, `min_count: 1` for the live demo.
+- `policy.json` — real policy. Trusts our self-hosted attestor `0x3dafd19a…5485` plus the 3 live Reclaim
+  attestors (2026-10-28); pins two Udemy provider hashes (Reclaim's stale one and our `attest.ts` spec);
+  `min_count: 1` for the live demo.
+- `fixtures/live/udemy.json` — a real Udemy claim (2026-10-31) from our attestor; tested against `policy.json`.
+- `../attestor-core` (outside the repo) — Reclaim's attestor server, commit `dd43dc8`; key in its
+  `.env.development` (never commit). Start: `node --experimental-strip-types src/scripts/start-server.ts`.
 - `contracts/` — `ExpertBadge.sol` (stretch) + Foundry tests against a mock SP1 verifier. Not deployed.
 - `docs/PROVIDERS.md` — Reclaim provider IDs, endpoints, fields, attestor list (research, with sources).
 - `docs/DESIGN.md` — HLD, LLD, threat model. `docs/PLAN.md` — status and next steps.
@@ -73,7 +77,17 @@ Deadline: **Thursday 2026-10-29, end of day IST.** Scope is deliberately cut to 
 10. **`policy.json` `min_count: 1`** for the live demo (one completed course available). Test
     policy keeps 2.
 
+## Decisions made 2026-10-31
+
+11. **Self-hosted attestor for live claims.** Reclaim's hosted Udemy provider is stale (Udemy's page no
+    longer makes the templated request) and its provider builder was down. We run Reclaim's open-source
+    attestor-core and send our own request spec (`attest.ts`). Same claim format, so `crates/core` is
+    unchanged. Trust model stated plainly: in the demo we are the attestor. Evidence in docs/PROVIDERS.md §0.
+12. **Changing `UDEMY_PARAMS` in `attest.ts` changes the provider hash**; re-pin it in `policy.json`
+    (run `npm run sdk-verify` on a new claim to print it). Secrets (cookie, UA) go in `secretParams` only,
+    so the hash is the same for every user.
+
 ## Open items
 
-- Confirm from the first real proof: signer is one of the 3 attestors; `completion_ratio` is 0–100.
+- Coursera live claim (needs a request spec + test account).
 - Rust ↔ Solidity `PublicValuesStruct` encoding is not cross-checked in a test (deliberately skipped).

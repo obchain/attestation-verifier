@@ -2,7 +2,9 @@
 
 Two terminals side by side, both at the repo root, font large. SP1 on PATH
 (`export PATH="$PATH:$HOME/.sp1/bin"`). Run `cargo build --release` in `script/` beforehand so
-nothing compiles on camera.
+nothing compiles on camera. Before recording: start the attestor in a third terminal
+(README step 3), keep Udemy logged in, and save a fresh `~/udemy.curl`. Clear old claims with
+`rm -f proofs/*.json` so only today's claim is used.
 
 Set once:
 
@@ -18,28 +20,34 @@ export BLINDING=0x$(openssl rand -hex 32)   # private; same value keeps check an
 > *this wallet completed courses in the Crypto industry, attested from udemy.com's own servers*,
 > and reveals nothing else.
 
-## 1. zkTLS: get a wallet-bound proof from Udemy (40 s)
+## 1. zkTLS: get a wallet-bound claim from Udemy (40 s)
+
+Show the attestor terminal briefly (`WS server listening`, `signerAddress 0x3dafd19a…`).
 
 ```bash
-cd prover && npm run request -- --platform udemy --wallet $WALLET
+cd prover && npm run attest -- --wallet $WALLET
 ```
 
-Scan the QR code on your phone, log into Udemy in the Reclaim flow.
+> This is Reclaim's open-source attestor, run by us. My machine opens a TLS session to udemy.com
+> *through* it, with my own session cookie. The attestor never sees the cookie: it gets ZK proofs that
+> the bytes it's shown really decrypt to Udemy's response, and signs only the course title and
+> completion ratio. My wallet and our app tag `eulerphi-zkcert:v1` are inside the signed claim, so
+> nobody can replay it for another wallet or app.
 
-> The Reclaim attestor watches the TLS session to udemy.com and signs only the fields we asked for:
-> course title and completion ratio. My wallet and our app tag `eulerphi-zkcert:v1` are inside the
-> signed claim, so nobody can replay this proof for another wallet or app.
+Point at `revealed fields: { completion_ratio: '100', title: '…Blockchain…' }`.
 
-Show the saved file briefly: `ls ../proofs/`.
+> Why our own attestor? Reclaim's public Udemy provider is stale: Udemy changed its API request and
+> the hosted flow never fires. Running the attestor ourselves took an afternoon and changed nothing in
+> the verifier.
 
 ## 2. Cross-check with Reclaim's own SDK (15 s)
 
 ```bash
-npm run sdk-verify -- ../proofs/udemy-*.json --online
+npm run sdk-verify -- ../proofs/udemy-*.json
 ```
 
-> Reclaim's SDK agrees the signature is valid and the signer is in the live attestor list.
-> But we don't rely on it — the trust boundary is the zkVM.
+> Reclaim's SDK recomputes the same claim identifier and signer, so this is a standard Reclaim claim.
+> But we don't rely on it: the trust boundary is the zkVM.
 
 ## 3. Native dry run (20 s)
 
@@ -57,7 +65,7 @@ cd ../script && cargo run --release -q -- check --proofs-dir ../proofs --policy 
 cargo run --release -q -- prove --proofs-dir ../proofs --policy ../policy.json --wallet $WALLET --blinding $BLINDING --system compressed
 ```
 
-Cut or speed up the wait. Mention ~1.7M cycles, keccak/secp256k1 precompiles.
+Cut or speed up the wait (~76 s for one claim). Mention keccak/secp256k1 precompiles.
 
 ## 5. Anyone can verify (15 s)
 
@@ -86,11 +94,14 @@ Expected: `proof #0 rejected: no signature from a trusted attestor`.
 
 ## 7. Close (15 s)
 
-> Scope: Udemy is live. Coursera uses the same pipeline but needs a custom Reclaim provider.
+> Scope: Udemy is live end to end. Coursera uses the same pipeline with its own request spec.
 > `contracts/ExpertBadge.sol` is the on-chain path once we produce a Groth16 proof.
-> Main trust assumption: Reclaim's attestor set.
+> Main trust assumption: the attestors pinned in the policy. Here that's us; in production, Phi's own
+> attestors, ideally several.
 
-## Fallback: no real proof
+## Fallback: Udemy session expired or attestor down
 
-Run steps 3–5 with `--input ../fixtures/input.test.json` instead of `--proofs-dir/--policy/--wallet`,
-and say plainly that the fixtures are signed by a test attestor through Reclaim's own SDK signing code.
+Use the committed real claim: `mkdir -p /tmp/live && cp fixtures/live/udemy.json /tmp/live/` and run
+steps 3–5 with `--proofs-dir /tmp/live --wallet 0xcEAf7dc6832d77d318068AE3a76dC36cb0e937EC --at 1793453110`
+(it was made 2026-10-31; `--at` keeps it inside the freshness window). Last resort:
+`--input ../fixtures/input.test.json` (test attestor, signed through Reclaim's SDK code).

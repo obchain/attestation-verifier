@@ -15,13 +15,16 @@ collecting personal data. Two things are needed:
 
 ```
  ┌──────────── user device ────────────┐          ┌──────────────── prover host ─────────────────┐
- │ Reclaim app / extension             │          │  zkcert CLI (script/)                        │
- │  logs into udemy.com / coursera.org │  proofs  │   load proofs + policy + wallet + time       │
- │  attestor observes TLS session      ├─────────▶│        │                                     │
- │  reveals: title, completion, cert id│  (JSON)  │        ▼                                     │
- │  context: wallet + app tag + nonce  │          │  SP1 zkVM ── program/ ── crates/core         │
- └─────────────────────────────────────┘          │   verify every proof, evaluate policy        │
-         ▲ prover/request.ts                      │   commit ABI PublicValuesStruct              │
+ │ prover/attest.ts (+ user's session) │          │  zkcert CLI (script/)                        │
+ │  TLS to www.udemy.com, tunnelled    │  proofs  │   load proofs + policy + wallet + time       │
+ │  through the attestor; ZK proofs    ├─────────▶│        │                                     │
+ │  show redacted bytes are genuine    │  (JSON)  │        ▼                                     │
+ │  reveals: title, completion         │          │  SP1 zkVM ── program/ ── crates/core         │
+ │  context: wallet + app tag + nonce  │          │   verify every proof, evaluate policy        │
+ └──────────────┬──────────────────────┘          │   commit ABI PublicValuesStruct              │
+                ▼ signed claim                    │                                              │
+   attestor (self-hosted attestor-core,           │                                              │
+   or Reclaim's hosted ones via request.ts)       │                                              │
                                                   └───────────────┬──────────────────────────────┘
                                                                   │ proof + public values
                                                                   ▼
@@ -33,7 +36,7 @@ collecting personal data. Two things are needed:
 
 | Component | Trusted for | If compromised |
 |---|---|---|
-| Reclaim attestor(s) in `policy.attestors` | Faithfully reporting what udemy.com/coursera.org returned | Can forge credentials. Mitigation: multiple attestors, attestor TEE attestation (SDK supports it), or swap in TLSNotary with a self-run notary. |
+| Attestor(s) in `policy.attestors` (ours for the live demo, plus Reclaim's 3) | Faithfully reporting what udemy.com/coursera.org returned | Can forge credentials. Mitigation: Phi runs its own attestors, k-of-n signatures, attestor TEE attestation, or TLSNotary with a self-run notary. In the demo we run the attestor, so this is trust in ourselves; the protocol is the same as Reclaim's. |
 | Udemy / Coursera | Truth of the data | Out of scope |
 | SP1 | Soundness of the zkVM proof | Out of scope |
 | Prover host | Nothing | Cannot forge: all checks run inside the zkVM. It can only choose *which* valid credentials to include and the evaluation time (which is public). |
@@ -113,17 +116,21 @@ Phi has many industries and attestor sets rotate. Making the policy an input kee
 ## 4. Known limitations
 
 - **Attestor trust** (see table). This is the main assumption of any proxy/attestor zkTLS design.
-- **Field mapping is per provider.** `policy.json` pins the "Udemy Course Name" provider's endpoint
-  (`/api-2.0/users/me/subscribed-courses/`) and fields (`title`, `completion_ratio`), taken from the
-  provider's definition (docs/PROVIDERS.md). Any other provider needs its own policy block.
-- **Courses vs certificates.** That provider exposes course title and completion ratio, with no
-  certificate id or date, so the claim is "completed courses". A custom provider on Udemy's
-  certificate endpoint would be stronger.
-- **One course per proof.** The provider reveals only `results[0]`, the most recently accessed
-  course. N courses need N proofs; a custom provider with more indices would fix this.
-- **Coursera is designed, not shipped.** No public Reclaim provider exists. A custom provider on the
-  logged-in accomplishments API is needed (not the public verify page, which anyone holding the
-  code could attest). The policy block exists; no Coursera proof has been made.
+- **Reclaim's hosted Udemy provider is stale** (docs/PROVIDERS.md §0), so live claims use our own request
+  spec on a self-hosted attestor. Both provider hashes are pinned; only ours works today.
+- **Field mapping is per provider.** `policy.json` pins the endpoint
+  (`/api-2.0/users/me/subscribed-courses/`), the exact request/extraction spec (provider hash) and the
+  fields (`title`, `completion_ratio`). Any other provider needs its own policy block.
+- **Courses vs certificates.** The endpoint exposes course title and completion ratio, with no
+  certificate id or date, so the claim is "completed courses". The progress endpoint's
+  `first_completion_time` would add a date.
+- **One course per proof.** The spec reveals only `results[0]` of `page_size=1`, the most recently
+  accessed course. N courses need N proofs; one pinned spec per `page=N` would fix this.
+- **Session capture is manual** in the demo (a "Copy as cURL" file); a product captures it in an
+  extension or webview.
+- **Coursera is designed, not shipped.** Needs a request spec on the logged-in accomplishments API
+  (not the public verify page, which anyone holding the code could attest). The policy block exists;
+  no Coursera proof has been made.
 - **Keyword industry mapping is naive.** A curated course-ID → industry map, or issuer-side
   tags, would be better.
 - **Evaluation time is chosen by the prover** (but public). A verifier should reject

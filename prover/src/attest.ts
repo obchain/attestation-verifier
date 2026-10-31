@@ -105,4 +105,6 @@ async function main(): Promise<void> {
   console.log("revealed fields:", JSON.parse(claim.context).extractedParameters);
 }
 
+// The attestor client keeps its WebSocket open in a shared pool; exit explicitly.
 await main();
+process.exit(0);
