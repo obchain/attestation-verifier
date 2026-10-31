@@ -1,0 +1,21 @@
+{
+  "identifier": "0x206ef017d64dc71a299c81e196fa159a859c9832071e072b5698f5ccb4370f79",
+  "claimData": {
+    "provider": "http",
+    "parameters": "{\"method\":\"GET\",\"responseMatches\":[{\"type\":\"regex\",\"value\":\"\\\"title\\\":\\\"(?<title>(?:[^\\\"\\\\\\\\]|\\\\\\\\.)*)\\\"\"},{\"type\":\"regex\",\"value\":\"\\\"completion_ratio\\\":(?<completion_ratio>\\\\d+)\"}],\"responseRedactions\":[{\"jsonPath\":\"$.results[0].title\",\"regex\":\"\\\"title\\\":\\\"(.*)\\\"\"},{\"jsonPath\":\"$.results[0].completion_ratio\",\"regex\":\"\\\"completion_ratio\\\":(.*)\"}],\"url\":\"https://www.udemy.com/api-2.0/users/me/subscribed-courses/?ordering=-last_accessed&page_size=1&fields[course]=title,completion_ratio\"}",
+    "owner": "0xf044aa0d62edfdf634586b85e1ed46f88da18c75",
+    "timestampS": 1793453050,
+    "context": "{\"contextAddress\":\"0xcEAf7dc6832d77d318068AE3a76dC36cb0e937EC\",\"contextMessage\":\"eulerphi-zkcert:v1:7b05cdaa16fc3d8f\",\"extractedParameters\":{\"completion_ratio\":\"100\",\"title\":\"Learn the secrets of Blockchain in less than an hour\"},\"providerHash\":\"0x1343d0b39a5c913c300ec51fec24ce816a2edabb08981b73b968c83398ff489c\"}",
+    "identifier": "0x206ef017d64dc71a299c81e196fa159a859c9832071e072b5698f5ccb4370f79",
+    "epoch": 1
+  },
+  "signatures": [
+    "0x5fa888d37f5b1d739f76301372b80884cd163ef4d907d298456e25bb6d3862e137cfc3b0e09e7f128943cf539d0fdab3a37623430b1243ce14667e7e60143dd21b"
+  ],
+  "witnesses": [
+    {
+      "id": "0x3dafd19a94d459d99b5154e8da32c932889d5485",
+      "url": "ws://localhost:8001/ws"
+    }
+  ]
+}

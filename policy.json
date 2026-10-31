@@ -4,7 +4,8 @@
   "attestors": [
     "0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb",
     "0x244897572368eadf65bfbc5aec98d8e5443a9072",
-    "0x15ea90114bffea9bb996e8775bf6ca0a338e97e5"
+    "0x15ea90114bffea9bb996e8775bf6ca0a338e97e5",
+    "0x3dafd19a94d459d99b5154e8da32c932889d5485"
   ],
   "platforms": [
     {
@@ -15,7 +16,10 @@
       "completion_keys": ["completion_ratio"],
       "completion_is_fraction": false,
       "cert_id_keys": [],
-      "provider_hashes": ["0x04faa3b05ed4261018533612faea7710064f134c23f70c5ef961dc8663c107e0"]
+      "provider_hashes": [
+        "0x04faa3b05ed4261018533612faea7710064f134c23f70c5ef961dc8663c107e0",
+        "0x1343d0b39a5c913c300ec51fec24ce816a2edabb08981b73b968c83398ff489c"
+      ]
     },
     {
       "name": "coursera",

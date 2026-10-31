@@ -239,6 +239,34 @@ fn whole_set_fails_closed_on_one_bad_proof() {
     assert_eq!(err, VerifyError::UntrustedAttestor);
 }
 
+// A real Udemy claim made on our self-hosted attestor (prover/src/attest.ts),
+// checked against the real policy.json.
+const LIVE_WALLET: &str = "0xcEAf7dc6832d77d318068AE3a76dC36cb0e937EC";
+const LIVE_AT: u64 = 1_793_453_110;
+
+fn live() -> (ReclaimProof, eulerphi_core::Policy) {
+    let proof = std::fs::read_to_string(format!("{FIXTURES}/live/udemy.json")).unwrap();
+    let policy = std::fs::read_to_string(format!("{FIXTURES}/../policy.json")).unwrap();
+    (serde_json::from_str(&proof).unwrap(), serde_json::from_str(&policy).unwrap())
+}
+
+#[test]
+fn live_udemy_claim_verifies_under_real_policy() {
+    let (p, policy) = live();
+    let wallet = reclaim::parse_address(LIVE_WALLET).unwrap();
+    let c = verify_proof(&p, &policy, &wallet, LIVE_AT).unwrap();
+    assert_eq!(c.title, "Learn the secrets of Blockchain in less than an hour");
+    assert_eq!(c.completion_pct, 100);
+}
+
+#[test]
+fn live_udemy_claim_needs_our_attestor_pinned() {
+    let (p, mut policy) = live();
+    policy.attestors.retain(|a| !a.eq_ignore_ascii_case("0x3dafd19a94d459d99b5154e8da32c932889d5485"));
+    let wallet = reclaim::parse_address(LIVE_WALLET).unwrap();
+    assert_eq!(verify_proof(&p, &policy, &wallet, LIVE_AT).unwrap_err(), VerifyError::UntrustedAttestor);
+}
+
 #[test]
 fn rejects_unsigned_and_malformed() {
     let mut p = input().proofs[0].clone();

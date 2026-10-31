@@ -8,9 +8,11 @@
     "request": "tsx src/request.ts",
     "fixtures": "tsx src/fixtures.ts",
     "sdk-verify": "tsx src/sdk-verify.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "attest": "tsx src/attest.ts"
   },
   "dependencies": {
+    "@reclaimprotocol/attestor-core": "5.1.6",
     "@reclaimprotocol/js-sdk": "5.8.3",
     "dotenv": "^16.4.5",
     "ethers": "^6.13.4",
