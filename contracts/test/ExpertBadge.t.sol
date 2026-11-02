@@ -133,6 +133,19 @@ contract ExpertBadgeTest {
         require(count == 4 && at == EVALUATED_AT + 30 minutes, "refreshed");
     }
 
+    function test_BadgeLapsesAfterMaxAgeUntilRefreshed() public {
+        claimAs(WALLET, rustPv());
+        vm.warp(EVALUATED_AT + MAX_AGE);
+        require(badge.hasBadge(WALLET, "crypto"), "valid at maxAge");
+        vm.warp(EVALUATED_AT + MAX_AGE + 1);
+        require(!badge.hasBadge(WALLET, "crypto"), "lapsed");
+
+        PublicValuesStruct memory pv = rustPv();
+        pv.evaluatedAt = EVALUATED_AT + MAX_AGE;
+        claimAs(WALLET, pv);
+        require(badge.hasBadge(WALLET, "crypto"), "refreshed");
+    }
+
     function test_RevertStale() public {
         vm.warp(EVALUATED_AT + MAX_AGE + 1);
         vm.expectRevert(ExpertBadge.NotFresh.selector);

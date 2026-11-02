@@ -1,0 +1,21 @@
+{
+  "identifier": "0x9133febb3a414a9a32a933ee4d160085e025dbdc3ed60561caa0869acd81b851",
+  "claimData": {
+    "provider": "http",
+    "parameters": "{\"method\":\"GET\",\"responseMatches\":[{\"type\":\"regex\",\"value\":\"\\\"title\\\":\\\"(?<title>(?:[^\\\"\\\\\\\\]|\\\\\\\\.)*)\\\"\"},{\"type\":\"regex\",\"value\":\"\\\"completion_ratio\\\":(?<completion_ratio>\\\\d+)\"}],\"responseRedactions\":[{\"jsonPath\":\"$.results[0].title\",\"regex\":\"\\\"title\\\":\\\"(.*)\\\"\"},{\"jsonPath\":\"$.results[0].completion_ratio\",\"regex\":\"\\\"completion_ratio\\\":(.*)\"}],\"url\":\"https://www.udemy.com/api-2.0/users/me/subscribed-courses/?ordering=-last_accessed&page_size=1&fields[course]=title,completion_ratio\"}",
+    "owner": "0x1500e8116a65cf3c6a090c16e44bbf17ae631f59",
+    "timestampS": 1793609675,
+    "context": "{\"contextAddress\":\"0xDAcEa3F3ef21eC7A525591810FcD4615D5154431\",\"contextMessage\":\"eulerphi-zkcert:v1:d84c2df5a515b685\",\"extractedParameters\":{\"completion_ratio\":\"100\",\"title\":\"Blockchain Revolution\"},\"providerHash\":\"0x1343d0b39a5c913c300ec51fec24ce816a2edabb08981b73b968c83398ff489c\"}",
+    "identifier": "0x9133febb3a414a9a32a933ee4d160085e025dbdc3ed60561caa0869acd81b851",
+    "epoch": 1
+  },
+  "signatures": [
+    "0x5f8385682dd1e1cebb4863a315bf3da6ec6f698daab422341acefd367f27487e2c1b547867077c172e7205142819a773e1bcd6a93dfc6a2a117683442b3760b01c"
+  ],
+  "witnesses": [
+    {
+      "id": "0x3dafd19a94d459d99b5154e8da32c932889d5485",
+      "url": "ws://localhost:8001/ws"
+    }
+  ]
+}

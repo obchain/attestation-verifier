@@ -20,7 +20,7 @@ the struct in `src/ExpertBadge.sol`.
 
 ## Deploying to a testnet
 
-Deployed on Sepolia (chain 11155111): `0x71590f59e84daedd3347b466138f4cf9c0840728`, maxAge 30 days. Details in `fixtures/live/onchain.json`.
+Deployed on Sepolia (chain 11155111): `0x441f21eff2c97d19c1aac3550e5c561f8fa58692`, maxAge 30 days; `hasBadge` lapses after that until refreshed. Details in `fixtures/live/onchain.json`.
 
 1. Produce an on-chain proof (needs the SP1 toolchain and the Groth16 artifacts/Docker or the
    prover network):

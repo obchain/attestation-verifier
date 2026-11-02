@@ -49,11 +49,12 @@ Deadline: **Thursday 2026-10-29, end of day IST.** Scope is deliberately cut to 
 - `fixtures/` — generated test data. `policy.test.json` trusts ONLY the test attestor.
 - `policy.json` — real policy. Trusts our self-hosted attestor `0x3dafd19a…5485` plus the 3 live Reclaim
   attestors (2026-10-28); pins two Udemy provider hashes (Reclaim's stale one and our `attest.ts` spec);
-  `min_count: 1` for the live demo.
-- `fixtures/live/udemy.json` — a real Udemy claim (2026-10-31) from our attestor; tested against `policy.json`.
+  `min_count: 2`.
+- `fixtures/live/` — real data: `udemy.json` (2026-10-31), `claims/` (the 2 claims behind the on-chain proof),
+  `onchain.json` (proof, public values, addresses, tx hashes).
 - `../attestor-core` (outside the repo) — Reclaim's attestor server, commit `dd43dc8`; key in its
   `.env.development` (never commit). Start: `node --experimental-strip-types src/scripts/start-server.ts`.
-- `contracts/` — `ExpertBadge.sol` + Foundry tests against a mock SP1 verifier. Live on Sepolia: `0x71590f59e84daedd3347b466138f4cf9c0840728`
+- `contracts/` — `ExpertBadge.sol` + Foundry tests against a mock SP1 verifier. Live on Sepolia: `0x441f21eff2c97d19c1aac3550e5c561f8fa58692`
   (`fixtures/live/onchain.json`). It pins the policy hash, so changing `policy.json` needs a redeploy.
 - `docs/PROVIDERS.md` — Reclaim provider IDs, endpoints, fields, attestor list (research, with sources).
 - `docs/DESIGN.md` — HLD, LLD, threat model. `docs/PLAN.md` — status and next steps.
@@ -75,8 +76,7 @@ Deadline: **Thursday 2026-10-29, end of day IST.** Scope is deliberately cut to 
 9. **Claim wording is "completed courses", not "certificates".** The "Udemy Course Name" provider
    (`3ef2059d-ec1e-4107-8187-e35157e527ad`) exposes `title` + `completion_ratio` only, and only for the
    most recently accessed course (one course per proof). Dedup falls back to normalized title.
-10. **`policy.json` `min_count: 1`** for the live demo (one completed course available). Test
-    policy keeps 2.
+10. ~~`policy.json` `min_count: 1`~~ Now 2: the test account has two completed crypto courses.
 
 ## Decisions made 2026-10-31
 
@@ -91,4 +91,5 @@ Deadline: **Thursday 2026-10-29, end of day IST.** Scope is deliberately cut to 
 ## Open items
 
 - Coursera live claim (needs a request spec + test account).
-- `ExpertBadge` badges don't expire (`hasBadge` stays true).
+- Real Udemy certificate proof: both completed courses are free (`has_certificate: false`), so we prove
+  completion. `/api-2.0/users/me/certificates/` needs a paid course and a new request spec.

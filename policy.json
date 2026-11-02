@@ -38,7 +38,7 @@
       "cryptography", "zero-knowledge", "zero knowledge", "zk*", "bitcoin", "solana"
     ]
   },
-  "min_count": 1,
+  "min_count": 2,
   "min_completion_pct": 100,
   "max_age_secs": 15552000
 }

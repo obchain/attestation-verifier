@@ -29,8 +29,8 @@ contract ExpertBadge {
     /// sha256 of the policy the proof must have been evaluated under (binds industry, attestors,
     /// thresholds). Policies are per industry, so this contract issues badges for one industry.
     bytes32 public immutable policyHash;
-    /// Max age of `evaluatedAt` at claim time. The host chooses `evaluatedAt`, and attestation
-    /// freshness inside the program is relative to it, so the chain must bound it.
+    /// Max age of `evaluatedAt`, at claim time and for `hasBadge`. The host chooses `evaluatedAt`,
+    /// and attestation freshness inside the program is relative to it, so the chain must bound it.
     uint64 public immutable maxAge;
 
     mapping(address wallet => mapping(bytes32 industryKey => Badge)) public badges;
@@ -80,7 +80,9 @@ contract ExpertBadge {
         emit BadgeClaimed(pv.wallet, industryKey, pv.industry, pv.qualifiedCount, pv.certSetCommitment, pv.evaluatedAt);
     }
 
+    /// A badge lapses `maxAge` after its evaluation, until a newer proof refreshes it.
     function hasBadge(address wallet, string calldata industry) external view returns (bool) {
-        return badges[wallet][keccak256(bytes(industry))].evaluatedAt != 0;
+        uint64 evaluatedAt = badges[wallet][keccak256(bytes(industry))].evaluatedAt;
+        return evaluatedAt != 0 && block.timestamp - evaluatedAt <= maxAge;
     }
 }

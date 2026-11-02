@@ -3,8 +3,9 @@
 Two terminals side by side, both at the repo root, font large. SP1 on PATH
 (`export PATH="$PATH:$HOME/.sp1/bin"`). Run `cargo build --release` in `script/` beforehand so
 nothing compiles on camera. Before recording: start the attestor in a third terminal
-(README step 3), keep Udemy logged in, and save a fresh `~/udemy.curl`. Clear old claims with
-`rm -f proofs/*.json` so only today's claim is used.
+(README step 3), keep Udemy logged in, and save a fresh `~/udemy.curl`. The policy needs 2 courses:
+make one claim off camera first (open one completed course on Udemy, run `npm run attest`), then open the other. Clear old claims with
+`rm -f proofs/*.json` before that first claim, so only today's claims are used.
 
 Set once:
 
@@ -65,7 +66,7 @@ cd ../script && cargo run --release -q -- check --proofs-dir ../proofs --policy 
 cargo run --release -q -- prove --proofs-dir ../proofs --policy ../policy.json --wallet $WALLET --blinding $BLINDING --system compressed
 ```
 
-Cut or speed up the wait (~76 s for one claim). Mention keccak/secp256k1 precompiles.
+Cut or speed up the wait (about 80 s). Mention keccak/secp256k1 precompiles.
 
 ## 5. Anyone can verify (15 s)
 
@@ -80,10 +81,10 @@ cargo run --release -q -- verify --proof proof.bin
 
 ## 5b. On-chain (20 s)
 
-Open the [claim tx](https://sepolia.etherscan.io/tx/0xd1967bbd998272a275d17b870a5afe557c8634e6f556fa2b3b0fc00210e75039) on Etherscan, then:
+Open the [claim tx](https://sepolia.etherscan.io/tx/0xf56dc1f4f64f70711360a8a7097c1e9c51218b17c71cca639a8118a91987a9f0) on Etherscan, then:
 
 ```bash
-cast call 0x71590f59e84daedd3347b466138f4cf9c0840728 "hasBadge(address,string)(bool)" 0xDAcEa3F3ef21eC7A525591810FcD4615D5154431 crypto --rpc-url https://ethereum-sepolia-rpc.publicnode.com
+cast call 0x441f21eff2c97d19c1aac3550e5c561f8fa58692 "hasBadge(address,string)(bool)" 0xDAcEa3F3ef21eC7A525591810FcD4615D5154431 crypto --rpc-url https://ethereum-sepolia-rpc.publicnode.com
 ```
 
 > Same pipeline with a Groth16 wrapper: Succinct's live verifier on Sepolia accepted the proof and the
@@ -113,7 +114,7 @@ Expected: `proof #0 rejected: no signature from a trusted attestor`.
 
 ## Fallback: Udemy session expired or attestor down
 
-Use the committed real claim: `mkdir -p /tmp/live && cp fixtures/live/udemy.json /tmp/live/` and run
-steps 3–5 with `--proofs-dir /tmp/live --wallet 0xcEAf7dc6832d77d318068AE3a76dC36cb0e937EC --at 1793453110`
-(it was made 2026-10-31; `--at` keeps it inside the freshness window). Last resort:
+Use the committed real claims: run steps 3–5 with `--proofs-dir ../fixtures/live/claims
+--wallet 0xDAcEa3F3ef21eC7A525591810FcD4615D5154431 --at 1793609751` (made 2026-11-02; `--at` keeps them
+inside the freshness window). Last resort:
 `--input ../fixtures/input.test.json` (test attestor, signed through Reclaim's SDK code).

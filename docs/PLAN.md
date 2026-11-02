@@ -37,8 +37,9 @@ Original deadline Thu 2026-10-29; extended to finish the live pipeline (2026-10-
 7. [ ] Coursera live: same approach (own request spec on the logged-in accomplishments API).
    Needs a test account with a completed course.
 8. [x] README/DEMO/DESIGN rewritten for the live flow. [ ] Record the 2–3 min demo (docs/DEMO.md)
-10. [ ] Optional: second completed crypto course → live `min_count: 2`; one spec per `page=N`.
+10. [x] Second completed crypto course → live `min_count: 2`, `qualifiedCount 2` on Sepolia (2026-11-02).
+    Real certificate: needs a paid course (free courses have none), not done.
 11. [ ] Cleanup: log out of Udemy (cookies were shared in chat), delete `~/udemy.curl`,
     rotate the Reclaim app secret, remove merged track branches/worktrees.
-9. [x] `ExpertBadge.sol` + 10 Foundry tests (mock verifier). [x] Groth16 + Sepolia: `0x71590f59e84daedd3347b466138f4cf9c0840728`,
-   claim tx `0xd1967bbd998272a275d17b870a5afe557c8634e6f556fa2b3b0fc00210e75039`, `hasBadge = true` (2026-11-02). Evidence in `fixtures/live/onchain.json`.
+9. [x] `ExpertBadge.sol` + 10 Foundry tests (mock verifier). [x] Groth16 + Sepolia: `0x441f21eff2c97d19c1aac3550e5c561f8fa58692`,
+   claim tx `0xf56dc1f4f64f70711360a8a7097c1e9c51218b17c71cca639a8118a91987a9f0`, `hasBadge = true` (2026-11-02). Evidence in `fixtures/live/onchain.json`.

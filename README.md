@@ -2,7 +2,7 @@
 
 **Verified-expert proofs for Phi, from zkTLS-attested Udemy course completions, proven in SP1.**
 Runs live end to end: a real Udemy account → our own zkTLS attestor → SP1 proof → a badge on Sepolia
-([contract](https://sepolia.etherscan.io/address/0x71590f59e84daedd3347b466138f4cf9c0840728), [claim tx](https://sepolia.etherscan.io/tx/0xd1967bbd998272a275d17b870a5afe557c8634e6f556fa2b3b0fc00210e75039)).
+([contract](https://sepolia.etherscan.io/address/0x441f21eff2c97d19c1aac3550e5c561f8fa58692), [claim tx](https://sepolia.etherscan.io/tx/0xf56dc1f4f64f70711360a8a7097c1e9c51218b17c71cca639a8118a91987a9f0)).
 Coursera uses the same pipeline with its own request spec (see [Limitations](#limitations)).
 
 > *"Wallet `0x5Aae…e7C5` holds at least 2 distinct, fully completed courses in the **Crypto**
@@ -56,7 +56,7 @@ Full HLD, LLD and threat model: [docs/DESIGN.md](docs/DESIGN.md).
 **1. Tests (no SP1 toolchain needed)**
 
 ```bash
-cargo test            # 29 tests: SDK compatibility, a real Udemy claim, forgery/replay/staleness/spec rejections
+cargo test            # 30 tests: SDK compatibility, a real Udemy claim, forgery/replay/staleness/spec rejections
 ```
 
 **2. Prove with fixtures**
@@ -105,7 +105,8 @@ Copy as cURL, and `pbpaste > ~/udemy.curl && chmod 600 ~/udemy.curl`.
 
 ```bash
 cd prover && npm install
-npm run attest -- --wallet 0xYourWallet          # claim on your most recently accessed course
+npm run attest -- --wallet 0xYourWallet          # claim on your most recently accessed course; open
+                                                 # your other completed course on Udemy and repeat
 npm run sdk-verify -- ../proofs/udemy-*.json     # Reclaim's SDK recomputes the same identifier
 cd ../script
 cargo run --release -- check  --proofs-dir ../proofs --policy ../policy.json --wallet 0xYourWallet
@@ -114,7 +115,7 @@ cargo run --release -- verify --proof proof.bin
 ```
 
 Real run (2026-10-31): claim in 3.4 s (5 ZK proofs for the redactions), SP1 compressed proof in
-76 s, `proof is VALID`, `qualified 1 / 1`, `passed true`.
+76 s, `proof is VALID`. With two completed courses (2026-11-02): `qualified 2 / 2`, `passed true`.
 
 **4. On-chain (Sepolia, live)**
 
@@ -127,18 +128,18 @@ cast send <badge> "claim(bytes,bytes)" <public-values> <onchain-proof> --rpc-url
 Check the deployed badge yourself, no wallet needed:
 
 ```bash
-cast call 0x71590f59e84daedd3347b466138f4cf9c0840728 "hasBadge(address,string)(bool)" 0xDAcEa3F3ef21eC7A525591810FcD4615D5154431 crypto --rpc-url https://ethereum-sepolia-rpc.publicnode.com
+cast call 0x441f21eff2c97d19c1aac3550e5c561f8fa58692 "hasBadge(address,string)(bool)" 0xDAcEa3F3ef21eC7A525591810FcD4615D5154431 crypto --rpc-url https://ethereum-sepolia-rpc.publicnode.com
 ```
 
 | On Sepolia (2026-11-02) | |
 |---|---|
-| `ExpertBadge` | [`0x71590f59e84daedd3347b466138f4cf9c0840728`](https://sepolia.etherscan.io/address/0x71590f59e84daedd3347b466138f4cf9c0840728) ([deploy tx](https://sepolia.etherscan.io/tx/0x74a12286f83f2a498be88a6ffa4d7ddcd21cf965344df15c97deaf2f61b3ad30)) |
-| Claim, verified by Succinct's gateway `0x397A…dA9B` (v6.1.0 Groth16) | [`0xd1967bbd…`](https://sepolia.etherscan.io/tx/0xd1967bbd998272a275d17b870a5afe557c8634e6f556fa2b3b0fc00210e75039), 482,552 gas |
-| Result | `hasBadge(0xDAcE…4431, "crypto") = true`, `qualifiedCount 1` |
+| `ExpertBadge` | [`0x441f21eff2c97d19c1aac3550e5c561f8fa58692`](https://sepolia.etherscan.io/address/0x441f21eff2c97d19c1aac3550e5c561f8fa58692) ([deploy tx](https://sepolia.etherscan.io/tx/0xd0d3aca6e544c521dd6341c3bc90b97334e00d78d41d3805d32e747ac4957d13)) |
+| Claim, verified by Succinct's gateway `0x397A…dA9B` (v6.1.0 Groth16) | [`0xf56dc1f4…`](https://sepolia.etherscan.io/tx/0xf56dc1f4f64f70711360a8a7097c1e9c51218b17c71cca639a8118a91987a9f0), 482,540 gas |
+| Result | `hasBadge(0xDAcE…4431, "crypto") = true`, `qualifiedCount 2` |
 | Simulated with `eth_call` | Contract: other sender → `WrongWallet`, same proof again → `NotNewer`. Succinct's gateway directly: tampered public values → reverts |
 
 Proof and public values: [fixtures/live/onchain.json](fixtures/live/onchain.json). The Groth16 proof is 356 bytes; the
-first run took 41 min including the circuit download.
+first run took 41 min including the circuit download, later runs about 4.5 min.
 
 Reclaim's hosted flow (`npm run request`) is kept: it works the same way once Reclaim's Udemy
 provider is fixed (see below).
@@ -215,12 +216,13 @@ own attestor(s), ideally several with k-of-n signatures or TEE attestation, and 
 matching uses keywords. Details and mitigations in
 [docs/DESIGN.md](docs/DESIGN.md#4-known-limitations); provider research in [docs/PROVIDERS.md](docs/PROVIDERS.md).
 
-- **Courses, not certificates.** The endpoint exposes title and `completion_ratio`, not a certificate
-  id or date, so "completed" means 100% progress. Dedup falls back to the normalized title.
+- **Courses, not certificates.** Udemy's certificate API (`/api-2.0/users/me/certificates/`) exists, but it
+  returned an empty list for the test account: both completed courses are free, and free courses report
+  `has_certificate: false`. So we prove 100% completion; attesting a real certificate needs a paid course
+  and a new request spec for that endpoint. Dedup falls back to the normalized title.
 - **One course per proof.** Our request reveals only the most recently accessed course (`page_size=1`).
   N courses need N proofs; pinning one provider hash per `page=N` URL would remove the need to reopen
-  courses. The real `policy.json` uses `min_count: 1` (one completed course on the test account); the
-  test policy and fixtures keep `min_count: 2` to exercise dedup and thresholds.
+  courses. `policy.json` and the test policy both use `min_count: 2`.
 - **Session capture is manual.** The demo takes the session cookie from a "Copy as cURL" file. A product
   would capture it in a browser extension or in-app webview, as Reclaim's app does. The cookie is only
   used inside the TLS session; the attestor sees it redacted.
@@ -228,7 +230,5 @@ matching uses keywords. Details and mitigations in
   accomplishments API. The policy block is in place, but no Coursera proof has been made.
 - **attestor-core is AGPL-3.0.** Fine for this demo; a product running a modified attestor as a
   service must publish those changes.
-- **Badges don't expire.** `maxAge` limits how old a proof can be when claimed, but `hasBadge` stays true
-  afterwards. A reader should check `evaluatedAt` until expiry is added to the contract.
 - **One deployment per policy.** The contract pins one policy hash, so changing `policy.json` (adding
   Coursera, say) means a new deployment or an allow-list of hashes. The Sepolia wallet is a throwaway.

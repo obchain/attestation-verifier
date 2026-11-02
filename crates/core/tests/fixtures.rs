@@ -268,6 +268,28 @@ fn live_udemy_claim_needs_our_attestor_pinned() {
 }
 
 #[test]
+fn live_claims_pass_min_count_two_under_real_policy() {
+    // The two real claims behind the on-chain proof (fixtures/live/onchain.json).
+    let policy = std::fs::read_to_string(format!("{FIXTURES}/../policy.json")).unwrap();
+    let mut proofs = Vec::new();
+    for name in ["blockchain-revolution", "secrets-of-blockchain"] {
+        let raw = std::fs::read_to_string(format!("{FIXTURES}/live/claims/{name}.json")).unwrap();
+        proofs.push(serde_json::from_str(&raw).unwrap());
+    }
+    let i = ProgramInput {
+        wallet: "0xDAcEa3F3ef21eC7A525591810FcD4615D5154431".into(),
+        policy: serde_json::from_str(&policy).unwrap(),
+        proofs,
+        evaluated_at: 1_793_609_751,
+        blinding: format!("0x{}", "11".repeat(32)),
+    };
+    let e = evaluate(&i).unwrap();
+    assert_eq!(e.public.qualifiedCount, 2);
+    assert_eq!(e.public.minCount, 2);
+    assert!(e.public.passed);
+}
+
+#[test]
 fn onchain_public_values_decode() {
     // The bytes Succinct's verifier accepted on Sepolia (fixtures/live/onchain.json).
     let raw = std::fs::read_to_string(format!("{FIXTURES}/live/onchain.json")).unwrap();
