@@ -135,7 +135,7 @@ cast call 0x71590f59e84daedd3347b466138f4cf9c0840728 "hasBadge(address,string)(b
 | `ExpertBadge` | [`0x71590f59e84daedd3347b466138f4cf9c0840728`](https://sepolia.etherscan.io/address/0x71590f59e84daedd3347b466138f4cf9c0840728) ([deploy tx](https://sepolia.etherscan.io/tx/0x74a12286f83f2a498be88a6ffa4d7ddcd21cf965344df15c97deaf2f61b3ad30)) |
 | Claim, verified by Succinct's gateway `0x397A…dA9B` (v6.1.0 Groth16) | [`0xd1967bbd…`](https://sepolia.etherscan.io/tx/0xd1967bbd998272a275d17b870a5afe557c8634e6f556fa2b3b0fc00210e75039), 482,552 gas |
 | Result | `hasBadge(0xDAcE…4431, "crypto") = true`, `qualifiedCount 1` |
-| Simulated against the deployed contract | Other sender → `WrongWallet`; same proof again → `NotNewer`; tampered public values → verifier reverts |
+| Simulated with `eth_call` | Contract: other sender → `WrongWallet`, same proof again → `NotNewer`. Succinct's gateway directly: tampered public values → reverts |
 
 Proof and public values: [fixtures/live/onchain.json](fixtures/live/onchain.json). The Groth16 proof is 356 bytes; the
 first run took 41 min including the circuit download.
