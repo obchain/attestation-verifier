@@ -6,8 +6,8 @@ Course platforms already publish certificate links, so "this certificate exists"
 anyone can share someone else's link. EulerPhi's Phi platform wants *verified experts* without
 collecting personal data. Two things are needed:
 
-1. **zkTLS**: prove a credential came from the platform's own servers (Udemy today; Coursera
-   designed, see §4), *from the prover's own logged-in account*, revealing only selected fields.
+1. **zkTLS**: prove a credential came from the platform's own servers (Udemy and Coursera,
+   see §4), *from the prover's own logged-in account*, revealing only selected fields.
 2. **SP1**: turn several such credentials into one private, checkable statement that matters to
    Phi: *"this identity is a verified expert in industry X."*
 
@@ -128,9 +128,10 @@ Phi has many industries and attestor sets rotate. Making the policy an input kee
   accessed course. N courses need N proofs; one pinned spec per `page=N` would fix this.
 - **Session capture is manual** in the demo (a "Copy as cURL" file); a product captures it in an
   extension or webview.
-- **Coursera is designed, not shipped.** Needs a request spec on the logged-in accomplishments API
-  (not the public verify page, which anyone holding the code could attest). The policy block exists;
-  no Coursera proof has been made.
+- **Coursera** uses the logged-in `/api/memberships.v1?q=me` (not a public verify page, which anyone
+  holding the code could attest). `limit=1` returns one membership and its one linked course, so a title
+  can't be paired with another course's score. Completion is `grade.score` = 1, not a certificate.
+  `start=1..4` are pinned but untested, since the test account has one enrollment.
 - **Keyword industry mapping is naive.** A curated course-ID → industry map, or issuer-side
   tags, would be better.
 - **Evaluation time is chosen by the prover** (but public). A verifier should reject

@@ -34,12 +34,12 @@ Original deadline Thu 2026-10-29; extended to finish the live pipeline (2026-10-
 5. [x] `sdk-verify`: SDK recomputes the identifier; `completion_ratio` is 0–100 (`100`).
 6. [x] `zkcert check` → COUNTED, `passed true`; `prove --system compressed` 76 s; `verify` VALID
    (vkey `0x00ab7879f5ca22f155c50600e4209ac6b8e93c3e1eac1b42b7cbde0ac99439b8`).
-7. [ ] Coursera live: same approach (own request spec on the logged-in accomplishments API).
-   Needs a test account with a completed course.
+7. [x] Coursera live (2026-11-02): `attest.ts --platform coursera`, `/api/memberships.v1`, `policy.ai-ml.json`
+   with `min_count: 1`, AI & ML badge `0xd72de5801d4b448d380eb1e59a696134427e70e5`. A crypto course on Coursera is not done.
 8. [x] README/DEMO/DESIGN rewritten for the live flow. [ ] Record the 2–3 min demo (docs/DEMO.md)
 10. [x] Second completed crypto course → live `min_count: 2`, `qualifiedCount 2` on Sepolia (2026-11-02).
     Real certificate: needs a paid course (free courses have none), not done.
 11. [ ] Cleanup: log out of Udemy (cookies were shared in chat), delete `~/udemy.curl`,
     rotate the Reclaim app secret, remove merged track branches/worktrees.
-9. [x] `ExpertBadge.sol` + 10 Foundry tests (mock verifier). [x] Groth16 + Sepolia: `0x441f21eff2c97d19c1aac3550e5c561f8fa58692`,
-   claim tx `0xf56dc1f4f64f70711360a8a7097c1e9c51218b17c71cca639a8118a91987a9f0`, `hasBadge = true` (2026-11-02). Evidence in `fixtures/live/onchain.json`.
+9. [x] `ExpertBadge.sol` + 10 Foundry tests (mock verifier). [x] Groth16 + Sepolia: `0x18e3324fe3adec58f1805a5c27d47a8ea715f995`,
+   claim tx `0xb84069bc517d0580e69ec7868ce25f4f8d7100a1b25f5c61298f233d29c8ab6b`, `hasBadge = true` (2026-11-02). Evidence in `fixtures/live/onchain.json`.

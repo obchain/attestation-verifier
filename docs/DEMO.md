@@ -81,10 +81,10 @@ cargo run --release -q -- verify --proof proof.bin
 
 ## 5b. On-chain (20 s)
 
-Open the [claim tx](https://sepolia.etherscan.io/tx/0xf56dc1f4f64f70711360a8a7097c1e9c51218b17c71cca639a8118a91987a9f0) on Etherscan, then:
+Open the [claim tx](https://sepolia.etherscan.io/tx/0xb84069bc517d0580e69ec7868ce25f4f8d7100a1b25f5c61298f233d29c8ab6b) on Etherscan, then:
 
 ```bash
-cast call 0x441f21eff2c97d19c1aac3550e5c561f8fa58692 "hasBadge(address,string)(bool)" 0xDAcEa3F3ef21eC7A525591810FcD4615D5154431 crypto --rpc-url https://ethereum-sepolia-rpc.publicnode.com
+cast call 0x18e3324fe3adec58f1805a5c27d47a8ea715f995 "hasBadge(address,string)(bool)" 0xDAcEa3F3ef21eC7A525591810FcD4615D5154431 crypto --rpc-url https://ethereum-sepolia-rpc.publicnode.com
 ```
 
 > Same pipeline with a Groth16 wrapper: Succinct's live verifier on Sepolia accepted the proof and the
@@ -107,7 +107,8 @@ Expected: `proof #0 rejected: no signature from a trusted attestor`.
 
 ## 7. Close (15 s)
 
-> Scope: Udemy is live end to end. Coursera uses the same pipeline with its own request spec.
+> Scope: Udemy and Coursera are both live end to end. The crypto badge comes from 2 Udemy courses; the
+> AI & ML badge comes from 1 Coursera course, with the same program and a different policy.
 > `ExpertBadge` is live on Sepolia.
 > Main trust assumption: the attestors pinned in the policy. Here that's us; in production, Phi's own
 > attestors, ideally several.

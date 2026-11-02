@@ -290,6 +290,29 @@ fn live_claims_pass_min_count_two_under_real_policy() {
 }
 
 #[test]
+fn live_coursera_claim_passes_ai_policy_not_crypto() {
+    // A real claim of one AI course: it counts under AI & ML and not under crypto.
+    let raw = std::fs::read_to_string(format!("{FIXTURES}/live/coursera/database-agent.json")).unwrap();
+    let run = |file: &str| {
+        let policy = std::fs::read_to_string(format!("{FIXTURES}/../{file}")).unwrap();
+        evaluate(&ProgramInput {
+            wallet: "0xDAcEa3F3ef21eC7A525591810FcD4615D5154431".into(),
+            policy: serde_json::from_str(&policy).unwrap(),
+            proofs: vec![serde_json::from_str(&raw).unwrap()],
+            evaluated_at: 1_793_614_300,
+            blinding: format!("0x{}", "11".repeat(32)),
+        })
+        .unwrap()
+    };
+    let ai = run("policy.ai-ml.json");
+    assert_eq!(ai.credentials[0].0.title, "Building Your Own Database Agent");
+    assert_eq!(ai.credentials[0].0.completion_pct, 100);
+    assert_eq!(ai.credentials[0].1, Verdict::Counted);
+    assert!(ai.public.passed);
+    assert_eq!(run("policy.json").credentials[0].1, Verdict::OtherIndustry);
+}
+
+#[test]
 fn onchain_public_values_decode() {
     // The bytes Succinct's verifier accepted on Sepolia (fixtures/live/onchain.json).
     let raw = std::fs::read_to_string(format!("{FIXTURES}/live/onchain.json")).unwrap();

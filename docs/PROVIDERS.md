@@ -64,6 +64,11 @@ Sources: [Course Name page](https://dev.reclaimprotocol.org/provider/details/3ef
 
 ## 2. Coursera — no public provider found
 
+**Update 2026-11-02:** live on our attestor, no Reclaim provider needed. `GET /api/memberships.v1?q=me&start=N&limit=1&includes=courseId&fields=grade,courses.v1(name)&showHidden=true&filter=current,preEnrolled,completed`
+reveals `linked["courses.v1"][0].name` and `elements[0].grade.score` (0-1). A free enrollment reached
+`record: VERIFIED_PASSED`, `score: 1`. Hashes for `start=0..4` are pinned (`npm run attest -- --pins`).
+The notes below are the earlier research.
+
 - No Coursera provider turned up in web searches of dev.reclaimprotocol.org or Reclaim docs (only generic universities and the three Udemy ones). **Not found** (likely absent). Sources: [search results](https://dev.reclaimprotocol.org/provider/details/3ef2059d-ec1e-4107-8187-e35157e527ad) list only Udemy; Reclaim [education page](https://reclaimprotocol.org/education-verification) mentions universities, not Coursera.
 - Custom provider path: Reclaim dev portal → create HTTP provider; reviewed/activated manually ([Burnt guide](https://docs.burnt.com/xion/developers/verification/internet-verification/how-to-create-a-custom-reclaim-zktls-provider), [Reclaim wtf-are-providers](https://docs.reclaimprotocol.org/wtf-are-providers)). Confirmed that process exists; timeline for approval unknown.
 - Official Coursera API is partner-only (`api.coursera.org`, OAuth client credentials) → useless for a user-session proof ([third-party summary](https://www.rapidevelopers.com/md/bubble-integrations/coursera), likely). A provider must replay the **first-party web API** under `www.coursera.org`.

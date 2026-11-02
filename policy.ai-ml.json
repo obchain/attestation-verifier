@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "context_tag": "eulerphi-zkcert:v1",
+  "attestors": [
+    "0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb",
+    "0x244897572368eadf65bfbc5aec98d8e5443a9072",
+    "0x15ea90114bffea9bb996e8775bf6ca0a338e97e5",
+    "0x3dafd19a94d459d99b5154e8da32c932889d5485"
+  ],
+  "platforms": [
+    {
+      "name": "udemy",
+      "hosts": ["www.udemy.com"],
+      "path_prefixes": ["/api-2.0/users/me/subscribed-courses/"],
+      "title_keys": ["title"],
+      "completion_keys": ["completion_ratio"],
+      "completion_is_fraction": false,
+      "cert_id_keys": [],
+      "provider_hashes": [
+        "0x04faa3b05ed4261018533612faea7710064f134c23f70c5ef961dc8663c107e0",
+        "0x1343d0b39a5c913c300ec51fec24ce816a2edabb08981b73b968c83398ff489c"
+      ]
+    },
+    {
+      "name": "coursera",
+      "hosts": ["www.coursera.org"],
+      "path_prefixes": ["/api/memberships.v1"],
+      "title_keys": ["name"],
+      "completion_keys": ["score"],
+      "completion_is_fraction": true,
+      "cert_id_keys": [],
+      "provider_hashes": [
+        "0x14f53fdf72575fd212212ddd9a05d9138416855b7fda4a2e514ddcf67c1b3fa8",
+        "0x5b0cea58cba04e7303566352d306579a916dfef742e942ef03b17959440f5d52",
+        "0xa00eaa5e77bf4338782002d2a32adc4d71673db5f44ec9ccb44e1d617fab2f3e",
+        "0xed54ed43047ad037f16845470bf9e4577abdf563207fa3cde974c1cff5c1d6a7",
+        "0xa3b363f182dedf4a3a5c50b165181da147e5cc1d6dfa58c0751f506e482a06fb"
+      ]
+    }
+  ],
+  "industry": {
+    "id": "ai-ml",
+    "keywords": [
+      "ai", "artificial intelligence", "machine learning", "deep learning", "llm", "llms",
+      "generative", "neural network", "neural networks", "agent", "agents"
+    ]
+  },
+  "min_count": 1,
+  "min_completion_pct": 100,
+  "max_age_secs": 15552000
+}

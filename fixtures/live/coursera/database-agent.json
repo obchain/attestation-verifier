@@ -1,0 +1,21 @@
+{
+  "identifier": "0xb76e6ffbdd4519a090f1469aa13606b8fe2766621f7b24aee2ab699d69255c44",
+  "claimData": {
+    "provider": "http",
+    "parameters": "{\"method\":\"GET\",\"responseMatches\":[{\"type\":\"regex\",\"value\":\"\\\"name\\\":\\\"(?<name>(?:[^\\\"\\\\\\\\]|\\\\\\\\.)*)\\\"\"},{\"type\":\"regex\",\"value\":\"\\\"score\\\":(?<score>[0-9.]+)\"}],\"responseRedactions\":[{\"jsonPath\":\"$.linked[\\\"courses.v1\\\"][0].name\",\"regex\":\"\\\"name\\\":\\\"(.*)\\\"\"},{\"jsonPath\":\"$.elements[0].grade.score\",\"regex\":\"\\\"score\\\":(.*)\"}],\"url\":\"https://www.coursera.org/api/memberships.v1?q=me&start=0&limit=1&includes=courseId&fields=grade,courses.v1(name)&showHidden=true&filter=current,preEnrolled,completed\"}",
+    "owner": "0x6a07fbfaa4debf95a9334f21191e29168fefb555",
+    "timestampS": 1793614242,
+    "context": "{\"contextAddress\":\"0xDAcEa3F3ef21eC7A525591810FcD4615D5154431\",\"contextMessage\":\"eulerphi-zkcert:v1:f86c3383b40c0dbe\",\"extractedParameters\":{\"name\":\"Building Your Own Database Agent\",\"score\":\"1.0\"},\"providerHash\":\"0x14f53fdf72575fd212212ddd9a05d9138416855b7fda4a2e514ddcf67c1b3fa8\"}",
+    "identifier": "0xb76e6ffbdd4519a090f1469aa13606b8fe2766621f7b24aee2ab699d69255c44",
+    "epoch": 1
+  },
+  "signatures": [
+    "0x2cd1ab86714dd4b1511deb93048864b047b8141a4cf9faa655795e40cb308cf9391156ac3b43800fc52fa558ce52d45c3803551fc69b7652280411d7f68960fc1b"
+  ],
+  "witnesses": [
+    {
+      "id": "0x3dafd19a94d459d99b5154e8da32c932889d5485",
+      "url": "ws://localhost:8001/ws"
+    }
+  ]
+}

@@ -47,14 +47,15 @@ Deadline: **Thursday 2026-10-29, end of day IST.** Scope is deliberately cut to 
 - `prover` — TypeScript: `attest.ts` (live claim on our self-hosted attestor), `request.ts` (Reclaim hosted flow, currently broken upstream), `fixtures.ts`
   (test fixtures signed by a throwaway attestor via the SDK), `sdk-verify.ts` (SDK cross-check).
 - `fixtures/` — generated test data. `policy.test.json` trusts ONLY the test attestor.
-- `policy.json` — real policy. Trusts our self-hosted attestor `0x3dafd19a…5485` plus the 3 live Reclaim
+- `policy.ai-ml.json` — same as `policy.json` but industry `ai-ml`, `min_count: 1`.
+- `policy.json` — real policy (crypto). Trusts our self-hosted attestor `0x3dafd19a…5485` plus the 3 live Reclaim
   attestors (2026-10-28); pins two Udemy provider hashes (Reclaim's stale one and our `attest.ts` spec);
   `min_count: 2`.
 - `fixtures/live/` — real data: `udemy.json` (2026-10-31), `claims/` (the 2 claims behind the on-chain proof),
   `onchain.json` (proof, public values, addresses, tx hashes).
 - `../attestor-core` (outside the repo) — Reclaim's attestor server, commit `dd43dc8`; key in its
   `.env.development` (never commit). Start: `node --experimental-strip-types src/scripts/start-server.ts`.
-- `contracts/` — `ExpertBadge.sol` + Foundry tests against a mock SP1 verifier. Live on Sepolia: `0x441f21eff2c97d19c1aac3550e5c561f8fa58692`
+- `contracts/` — `ExpertBadge.sol` + Foundry tests against a mock SP1 verifier. Live on Sepolia: crypto `0x18e3324fe3adec58f1805a5c27d47a8ea715f995`, AI & ML `0xd72de5801d4b448d380eb1e59a696134427e70e5`
   (`fixtures/live/onchain.json`). It pins the policy hash, so changing `policy.json` needs a redeploy.
 - `docs/PROVIDERS.md` — Reclaim provider IDs, endpoints, fields, attestor list (research, with sources).
 - `docs/DESIGN.md` — HLD, LLD, threat model. `docs/PLAN.md` — status and next steps.
@@ -71,8 +72,7 @@ Deadline: **Thursday 2026-10-29, end of day IST.** Scope is deliberately cut to 
 
 ## Decisions made 2026-10-28 (after research, see docs/PROVIDERS.md)
 
-8. **Udemy only is shipped; Coursera is a design.** No public Coursera provider exists on Reclaim;
-   a custom provider would need Reclaim review, which doesn't fit the deadline.
+8. ~~Udemy only~~ Superseded by 13. No public Coursera provider exists on Reclaim.
 9. **Claim wording is "completed courses", not "certificates".** The "Udemy Course Name" provider
    (`3ef2059d-ec1e-4107-8187-e35157e527ad`) exposes `title` + `completion_ratio` only, and only for the
    most recently accessed course (one course per proof). Dedup falls back to normalized title.
@@ -88,8 +88,11 @@ Deadline: **Thursday 2026-10-29, end of day IST.** Scope is deliberately cut to 
     (run `npm run sdk-verify` on a new claim to print it). Secrets (cookie, UA) go in `secretParams` only,
     so the hash is the same for every user.
 
+13. **Coursera live (2026-11-02), via `/api/memberships.v1`** on our attestor. The one completed course is an
+    AI course, so it gets `policy.ai-ml.json` (`min_count: 1`) and its own badge, not the crypto one.
+
 ## Open items
 
-- Coursera live claim (needs a request spec + test account).
+- A crypto course on Coursera, and testing `--start 1..4` (needs a second enrollment).
 - Real Udemy certificate proof: both completed courses are free (`has_certificate: false`), so we prove
   completion. `/api-2.0/users/me/certificates/` needs a paid course and a new request spec.
