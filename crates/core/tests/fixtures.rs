@@ -268,6 +268,18 @@ fn live_udemy_claim_needs_our_attestor_pinned() {
 }
 
 #[test]
+fn onchain_public_values_decode() {
+    // The bytes Succinct's verifier accepted on Sepolia (fixtures/live/onchain.json).
+    let raw = std::fs::read_to_string(format!("{FIXTURES}/live/onchain.json")).unwrap();
+    let v: serde_json::Value = serde_json::from_str(&raw).unwrap();
+    let bytes = hex::decode(v["publicValues"].as_str().unwrap().trim_start_matches("0x")).unwrap();
+    let pv = decode_public(&bytes).unwrap();
+    assert_eq!(pv.wallet.0 .0, reclaim::parse_address(v["wallet"].as_str().unwrap()).unwrap());
+    assert_eq!(pv.industry, "crypto");
+    assert!(pv.passed);
+}
+
+#[test]
 fn rejects_unsigned_and_malformed() {
     let mut p = input().proofs[0].clone();
     p.signatures.clear();

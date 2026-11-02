@@ -1,4 +1,4 @@
-# contracts — on-chain ExpertBadge (stretch goal)
+# contracts — on-chain ExpertBadge
 
 `ExpertBadge.claim(publicValues, proof)` verifies an SP1 proof of the `program/` guest through
 Succinct's `SP1VerifierGateway`, decodes `PublicValuesStruct` (same field order as
@@ -18,9 +18,9 @@ cd contracts && forge test
 `fixtures/input.test.json`. If `PublicValuesStruct` changes in Rust, regenerate that hex and update
 the struct in `src/ExpertBadge.sol`.
 
-## Deploying to a testnet (once track A has a Groth16 proof)
+## Deploying to a testnet
 
-Nothing here is deployed yet. Example uses Sepolia (chain 11155111).
+Deployed on Sepolia (chain 11155111): `0x71590f59e84daedd3347b466138f4cf9c0840728`, maxAge 30 days. Details in `fixtures/live/onchain.json`.
 
 1. Produce an on-chain proof (needs the SP1 toolchain and the Groth16 artifacts/Docker or the
    prover network):
@@ -29,9 +29,8 @@ Nothing here is deployed yet. Example uses Sepolia (chain 11155111).
    cargo run --release --bin zkcert -- prove --input <input.json> --system groth16 --out proof.bin
    ```
 
-   It prints `program vkey`, `onchain proof 0x…`, and the decoded public values (incl. `policyHash`).
-   The ABI public values are `proof.public_values` in `proof.bin`; the CLI does not print them as hex
-   yet; add a `public values 0x…` line to `zkcert prove` (track A owns `script/`).
+   It prints `program vkey`, `onchain proof 0x…`, `public values 0x…`, and the decoded public values
+   (incl. `policyHash`).
 
 2. Pick the gateway. Groth16 gateway on Sepolia, from
    `sp1-contracts/contracts/deployments/11155111.json`: `0x397A5f7f3dBd538f23DE225B51f532c34448dA9B`.

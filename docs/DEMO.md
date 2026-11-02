@@ -78,6 +78,18 @@ cargo run --release -q -- verify --proof proof.bin
 > evaluation time. No course names, no account, no email. The commitment is blinded, so it can't be
 > matched against Udemy's public course list.
 
+## 5b. On-chain (20 s)
+
+Open the [claim tx](https://sepolia.etherscan.io/tx/0xd1967bbd998272a275d17b870a5afe557c8634e6f556fa2b3b0fc00210e75039) on Etherscan, then:
+
+```bash
+cast call 0x71590f59e84daedd3347b466138f4cf9c0840728 "hasBadge(address,string)(bool)" 0xDAcEa3F3ef21eC7A525591810FcD4615D5154431 crypto --rpc-url https://ethereum-sepolia-rpc.publicnode.com
+```
+
+> Same pipeline with a Groth16 wrapper: Succinct's live verifier on Sepolia accepted the proof and the
+> contract recorded the badge. The chain sees the verdict and a blinded commitment, no course names.
+> (Pre-made: a Groth16 run is too slow to film.)
+
 ## 6. It fails closed (20 s)
 
 ```bash
@@ -95,7 +107,7 @@ Expected: `proof #0 rejected: no signature from a trusted attestor`.
 ## 7. Close (15 s)
 
 > Scope: Udemy is live end to end. Coursera uses the same pipeline with its own request spec.
-> `contracts/ExpertBadge.sol` is the on-chain path once we produce a Groth16 proof.
+> `ExpertBadge` is live on Sepolia.
 > Main trust assumption: the attestors pinned in the policy. Here that's us; in production, Phi's own
 > attestors, ideally several.
 

@@ -1,7 +1,8 @@
 # eulerphi-zkcert
 
 **Verified-expert proofs for Phi, from zkTLS-attested Udemy course completions, proven in SP1.**
-Runs live end to end: a real Udemy account → our own zkTLS attestor → SP1 proof → `VALID`.
+Runs live end to end: a real Udemy account → our own zkTLS attestor → SP1 proof → a badge on Sepolia
+([contract](https://sepolia.etherscan.io/address/0x71590f59e84daedd3347b466138f4cf9c0840728), [claim tx](https://sepolia.etherscan.io/tx/0xd1967bbd998272a275d17b870a5afe557c8634e6f556fa2b3b0fc00210e75039)).
 Coursera uses the same pipeline with its own request spec (see [Limitations](#limitations)).
 
 > *"Wallet `0x5Aae…e7C5` holds at least 2 distinct, fully completed courses in the **Crypto**
@@ -55,7 +56,7 @@ Full HLD, LLD and threat model: [docs/DESIGN.md](docs/DESIGN.md).
 **1. Tests (no SP1 toolchain needed)**
 
 ```bash
-cargo test            # 28 tests: SDK compatibility, a real Udemy claim, forgery/replay/staleness/spec rejections
+cargo test            # 29 tests: SDK compatibility, a real Udemy claim, forgery/replay/staleness/spec rejections
 ```
 
 **2. Prove with fixtures**
@@ -114,6 +115,30 @@ cargo run --release -- verify --proof proof.bin
 
 Real run (2026-10-31): claim in 3.4 s (5 ZK proofs for the redactions), SP1 compressed proof in
 76 s, `proof is VALID`, `qualified 1 / 1`, `passed true`.
+
+**4. On-chain (Sepolia, live)**
+
+```bash
+cargo run --release -- prove --proofs-dir ../proofs --policy ../policy.json --wallet 0xYourWallet --system groth16 --out onchain.bin
+# prints `program vkey`, `onchain proof 0x…`, `public values 0x…`. Needs Docker; first run downloads the circuits.
+cast send <badge> "claim(bytes,bytes)" <public-values> <onchain-proof> --rpc-url $SEPOLIA_RPC_URL --account <wallet>
+```
+
+Check the deployed badge yourself, no wallet needed:
+
+```bash
+cast call 0x71590f59e84daedd3347b466138f4cf9c0840728 "hasBadge(address,string)(bool)" 0xDAcEa3F3ef21eC7A525591810FcD4615D5154431 crypto --rpc-url https://ethereum-sepolia-rpc.publicnode.com
+```
+
+| On Sepolia (2026-11-02) | |
+|---|---|
+| `ExpertBadge` | [`0x71590f59e84daedd3347b466138f4cf9c0840728`](https://sepolia.etherscan.io/address/0x71590f59e84daedd3347b466138f4cf9c0840728) ([deploy tx](https://sepolia.etherscan.io/tx/0x74a12286f83f2a498be88a6ffa4d7ddcd21cf965344df15c97deaf2f61b3ad30)) |
+| Claim, verified by Succinct's gateway `0x397A…dA9B` (v6.1.0 Groth16) | [`0xd1967bbd…`](https://sepolia.etherscan.io/tx/0xd1967bbd998272a275d17b870a5afe557c8634e6f556fa2b3b0fc00210e75039), 482,552 gas |
+| Result | `hasBadge(0xDAcE…4431, "crypto") = true`, `qualifiedCount 1` |
+| Simulated against the deployed contract | Other sender → `WrongWallet`; same proof again → `NotNewer`; tampered public values → verifier reverts |
+
+Proof and public values: [fixtures/live/onchain.json](fixtures/live/onchain.json). The Groth16 proof is 356 bytes; the
+first run took 41 min including the circuit download.
 
 Reclaim's hosted flow (`npm run request`) is kept: it works the same way once Reclaim's Udemy
 provider is fixed (see below).
@@ -203,5 +228,7 @@ matching uses keywords. Details and mitigations in
   accomplishments API. The policy block is in place, but no Coursera proof has been made.
 - **attestor-core is AGPL-3.0.** Fine for this demo; a product running a modified attestor as a
   service must publish those changes.
-- **Solidity ↔ Rust encoding not cross-checked.** `contracts/` tests use Solidity-encoded public values;
-  decoding a Rust-produced `PublicValuesStruct` in a test is still to do. Nothing is deployed.
+- **Badges don't expire.** `maxAge` limits how old a proof can be when claimed, but `hasBadge` stays true
+  afterwards. A reader should check `evaluatedAt` until expiry is added to the contract.
+- **One deployment per policy.** The contract pins one policy hash, so changing `policy.json` (adding
+  Coursera, say) means a new deployment or an allow-list of hashes. The Sepolia wallet is a throwaway.

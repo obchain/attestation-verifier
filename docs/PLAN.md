@@ -40,5 +40,5 @@ Original deadline Thu 2026-10-29; extended to finish the live pipeline (2026-10-
 10. [ ] Optional: second completed crypto course → live `min_count: 2`; one spec per `page=N`.
 11. [ ] Cleanup: log out of Udemy (cookies were shared in chat), delete `~/udemy.curl`,
     rotate the Reclaim app secret, remove merged track branches/worktrees.
-9. [x] `ExpertBadge.sol` + 10 Foundry tests (mock verifier). [ ] Groth16 + testnet deploy:
-   stretch, only if steps 4–8 are done by ~3 pm Thu
+9. [x] `ExpertBadge.sol` + 10 Foundry tests (mock verifier). [x] Groth16 + Sepolia: `0x71590f59e84daedd3347b466138f4cf9c0840728`,
+   claim tx `0xd1967bbd998272a275d17b870a5afe557c8634e6f556fa2b3b0fc00210e75039`, `hasBadge = true` (2026-11-02). Evidence in `fixtures/live/onchain.json`.

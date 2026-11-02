@@ -210,6 +210,7 @@ async fn main() {
             println!("program vkey      {}", pk.verifying_key().bytes32());
             if matches!(system, System::Groth16 | System::Plonk) {
                 println!("onchain proof     0x{}", hex::encode(proof.bytes()));
+                println!("public values     0x{}", hex::encode(proof.public_values.as_slice()));
             }
             print_public(&decode_public(proof.public_values.as_slice()).unwrap());
         }

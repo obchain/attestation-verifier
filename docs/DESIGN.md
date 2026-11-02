@@ -28,7 +28,7 @@ collecting personal data. Two things are needed:
                                                   └───────────────┬──────────────────────────────┘
                                                                   │ proof + public values
                                                                   ▼
-                                       Phi backend / anyone: `zkcert verify`, or an on-chain
+                                       Phi backend / anyone: `zkcert verify`, or on-chain (live on Sepolia)
                                        SP1 verifier (Groth16/PLONK) → "expert in crypto" badge
 ```
 

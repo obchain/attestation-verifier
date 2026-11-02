@@ -53,7 +53,8 @@ Deadline: **Thursday 2026-10-29, end of day IST.** Scope is deliberately cut to 
 - `fixtures/live/udemy.json` — a real Udemy claim (2026-10-31) from our attestor; tested against `policy.json`.
 - `../attestor-core` (outside the repo) — Reclaim's attestor server, commit `dd43dc8`; key in its
   `.env.development` (never commit). Start: `node --experimental-strip-types src/scripts/start-server.ts`.
-- `contracts/` — `ExpertBadge.sol` (stretch) + Foundry tests against a mock SP1 verifier. Not deployed.
+- `contracts/` — `ExpertBadge.sol` + Foundry tests against a mock SP1 verifier. Live on Sepolia: `0x71590f59e84daedd3347b466138f4cf9c0840728`
+  (`fixtures/live/onchain.json`). It pins the policy hash, so changing `policy.json` needs a redeploy.
 - `docs/PROVIDERS.md` — Reclaim provider IDs, endpoints, fields, attestor list (research, with sources).
 - `docs/DESIGN.md` — HLD, LLD, threat model. `docs/PLAN.md` — status and next steps.
 
@@ -90,4 +91,4 @@ Deadline: **Thursday 2026-10-29, end of day IST.** Scope is deliberately cut to 
 ## Open items
 
 - Coursera live claim (needs a request spec + test account).
-- Rust ↔ Solidity `PublicValuesStruct` encoding is not cross-checked in a test (deliberately skipped).
+- `ExpertBadge` badges don't expire (`hasBadge` stays true).
